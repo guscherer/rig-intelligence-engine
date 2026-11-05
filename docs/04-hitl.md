@@ -94,8 +94,8 @@ class FeedbackEvent(BaseModel):
     reviewer: str
     reason: str | None
     must_keep: list[str] = []
-    human_edited: str | None          # só em adjust
-    diff_ratio: float | None          # edit distance normalizada vs draft
+    human_edited: str | None  # só em adjust
+    diff_ratio: float | None  # edit distance normalizada vs draft
     created_at: datetime
     idempotency_key: str
 

@@ -1,0 +1,127 @@
+[project]
+name = "rig-intelligence-engine"
+version = "0.1.0"
+description = "Radar legislativo com rastro de evidência: triagem, RAG e minutas auditadas claim-a-claim."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "httpx>=0.27",
+    "structlog>=24.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.7",
+    "mypy>=1.11",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "import-linter>=2.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rig"]
+
+# ─────────────────────────────────────────────────────────────
+# Ruff — o gate real. Ver docs/10-engineering-standards.md §6.
+# ─────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",      # pycodestyle
+    "F",           # pyflakes
+    "I",           # isort
+    "N",           # pep8-naming
+    "UP",          # pyupgrade
+    "B",           # bugbear (bug provável)
+    "SIM",         # simplify
+    "C4",          # comprehensions
+    "RET",         # returns
+    "ARG",         # argumentos não usados
+    "PL",          # pylint subset (tamanho, complexidade)
+    "RUF",         # ruff próprias
+    "ASYNC",       # await esquecido — crítico em serviço async
+    "S",           # bandit (segurança)
+    "T20",         # print
+    "TID",         # imports relativos proibidos (tidy-imports)
+]
+ignore = [
+    "PLR2004",  # magic value: "Art. 5º", "90 dias", "0.35" são domínio, não magia
+    "PLR0911",  # muitos returns: guard clauses são mais legíveis que if aninhado
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 8
+max-branches = 12
+max-statements = 50
+max-nested-blocks = 4
+max-returns = 8
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+# SDK de provedor só dentro de src/rig/adapters/ (ADR-006, DIP).
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"google.genai".msg = "SDK de provedor só em src/rig/adapters/. Use o protocolo StructuredGenerator."
+"google.generativeai".msg = "SDK de provedor só em src/rig/adapters/."
+"openai".msg = "SDK de provedor só em src/rig/adapters/."
+"anthropic".msg = "SDK de provedor só em src/rig/adapters/."
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "ARG001", "ARG002"]            # assert e fixtures não usadas
+"src/rig/adapters/**" = ["TID251"]                    # aqui o SDK é permitido
+"src/rig/eval/**" = ["T20"]                           # relatório imprime
+"scripts/**" = ["T20", "S101"]
+
+# ─────────────────────────────────────────────────────────────
+# mypy
+# ─────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+files = ["src"]
+strict = true
+warn_unreachable = true
+warn_unused_ignores = true
+show_error_codes = true
+pretty = true
+disallow_any_generics = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+# ─────────────────────────────────────────────────────────────
+# pytest
+# ─────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-q --strict-markers"
+markers = [
+    "live: chama API ou provedor real (excluído do CI padrão)",
+    "slow: leva mais de 5 s",
+]
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["src/rig"]
+omit = ["*/adapters/*", "*/eval/*"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]

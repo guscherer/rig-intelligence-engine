@@ -54,14 +54,15 @@ Saída tipada:
 
 ```python
 class EvidenceSpan(BaseModel):
-    quote: str = Field(min_length=10, max_length=400)   # substring verbatim
+    quote: str = Field(min_length=10, max_length=400)  # substring verbatim
     location: Literal["ementa", "keywords", "tema", "tramitacao"]
+
 
 class TriageResult(BaseModel):
     decision: Literal["relevant", "borderline", "skip"]
     axes: list[Literal["tributario", "dados_e_ia", "trabalho", "ambiental", "comercio_exterior"]]
-    magnitude: int = Field(ge=1, le=5)          # tamanho do efeito
-    urgency: int = Field(ge=1, le=5)            # janela de ação
+    magnitude: int = Field(ge=1, le=5)  # tamanho do efeito
+    urgency: int = Field(ge=1, le=5)  # janela de ação
     direction: Literal["favoravel", "contrario", "incerto"]
     impact_summary: str = Field(max_length=280)
     evidence_spans: list[EvidenceSpan]
@@ -100,10 +101,10 @@ Busca no corpus institucional e devolve:
 
 ```python
 class PositioningBrief(BaseModel):
-    prior_stances: list[PriorStance]        # o que a empresa já disse, com data e fonte
+    prior_stances: list[PriorStance]  # o que a empresa já disse, com data e fonte
     applicable_guidelines: list[Guideline]  # regras internas de tom e de escopo
     red_lines_hit: list[RedLine]
-    consistency_notes: list[str]            # onde a posição nova divergiria da histórica
+    consistency_notes: list[str]  # onde a posição nova divergiria da histórica
 ```
 
 `red_lines_hit` é curto-circuito: se a proposição pede posicionamento sobre matéria eleitoral, o grafo vai para `refuse` — **sem gastar tokens de redação**. Recusar cedo é mais barato e mais seguro que redigir e filtrar depois.

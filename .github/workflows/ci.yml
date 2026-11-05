@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: gate (ruff + mypy + fronteiras + testes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Instalar dependências
+        run: uv sync --extra dev --frozen
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Formatação
+        run: uv run ruff format --check .
+
+      - name: Tipagem estrita
+        run: uv run mypy
+
+      - name: Fronteiras de pacote (docs/10 §1)
+        run: uv run lint-imports --no-logo
+
+      - name: Testes (sem live)
+        run: uv run pytest -m "not live"
+
+      - name: Relatório de tamanho (warning)
+        run: uv run python scripts/size_report.py

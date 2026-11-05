@@ -117,3 +117,19 @@ Formato curto: contexto → decisão → consequência → o que foi rejeitado. 
 **Por quê.** Reprodutibilidade sem redistribuição. Também é a postura correta para alguém que vai trabalhar com propriedade intelectual e conteúdo institucional — o domínio da vaga.
 
 **Consequência.** O avaliador precisa rodar `make ingest` (requer rede) antes de `make demo`. Documentado no README, com fixtures pequenas commitadas para os testes rodarem offline.
+
+---
+
+## ADR-010 — Monólito modular em vez de microserviços
+
+**Contexto.** A vaga fala em "ecossistema", "ponte entre áreas técnicas" e integração com Salesforce/Teams/Slack — vocabulário que costuma vir acompanhado de expectativa de arquitetura distribuída. O projeto, porém, tem um desenvolvedor, um deploy e um grafo que compartilha estado entre cinco etapas.
+
+**Decisão.** Um binário, dois processos (`rig-api`, `rig-worker`) e fronteiras de pacote verificadas por `import-linter`. Nenhum serviço de rede interno.
+
+**Por quê.** O `RIGState` atravessa `triage → retrieve → positioning → draft → audit`. Fatiar isso em serviços converte cada aresta do grafo em chamada de rede com estado serializado, e troca um bug de lógica por cinco modos de falha distribuída (retry parcial, consistência eventual entre draft e audit, versionamento de contrato entre quem escreve e quem audita). Os eixos que justificariam distribuição não existem aqui: volume de ~6k documentos/ano, p95 de 90 s dominado por latência de LLM (escala por worker, não por serviço), e um único consumidor do retrieval.
+
+**Consequência.** O isolamento que importa — job longo não bloqueia request — vem de dois processos na mesma imagem, não de malha de serviços. As fronteiras de pacote são as mesmas que seriam as dos serviços, então extrair depois é mover arquivo, não reescrever. Critério declarado de extração: ingestão acima de 30 min competindo por CPU com geração, corpus acima de 50 M chunks, ou segundo consumidor do retrieval.
+
+**Risco aceito.** Um avaliador raso pode ler "monólito" como imaturidade. A defesa é este ADR com os números, não a omissão da decisão. Candidato que sabe *por que não* distribuir é mais sênior que o que distribui por default.
+
+**Rejeitado.** Microserviços por domínio (4 serviços para ~4k LOC = 1 serviço por 1k linhas, com 4 Dockerfiles, 4 pipelines e contratos entre eles); service mesh; event bus para um fluxo que é sequencial.

@@ -65,9 +65,9 @@ class RIGState(BaseModel):
     draft: Draft | None = None
     audit: AuditReport | None = None
 
-    repair_cycle: int = 0            # corta em 2
-    revision_notes: list[str] = []   # vem do humano, entra no draft
-    budget: BudgetState              # tokens, custo, deadline
+    repair_cycle: int = 0  # corta em 2
+    revision_notes: list[str] = []  # vem do humano, entra no draft
+    budget: BudgetState  # tokens, custo, deadline
     errors: list[NodeError] = []
     trace: list[NodeSpan] = []
 ```

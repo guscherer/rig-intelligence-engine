@@ -78,6 +78,8 @@ Decisões de arquitetura com o porquê: [`docs/09-decisions.md`](docs/09-decisio
 | [`docs/06-kpis.md`](docs/06-kpis.md) | KPIs de produto e de negócio, o que é medido e como |
 | [`docs/07-roadmap.md`](docs/07-roadmap.md) | Fases F0–F6, critérios de pronto por fase |
 | [`docs/08-failures.md`](docs/08-failures.md) | Registro de falhas reais encontradas e como foram fechadas |
+| [`docs/09-decisions.md`](docs/09-decisions.md) | 10 ADRs, cada um com a alternativa rejeitada e o custo da decisão |
+| [`docs/10-engineering-standards.md`](docs/10-engineering-standards.md) | Fronteiras de pacote, limites de tamanho, SOLID aplicado, gate de CI |
 | [`docs/golden-set/README.md`](docs/golden-set/README.md) | Protocolo de rotulagem da amostra de 120 proposições |
 
 ## Stack

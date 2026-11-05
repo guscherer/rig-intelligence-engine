@@ -1,0 +1,48 @@
+[importlinter]
+root_package = rig
+include_external_packages = False
+
+# ── 1. Camadas: só desce. Ver docs/10-engineering-standards.md §1 ──
+[importlinter:contract:layers]
+name = Camadas so descem: eval -> api -> agents -> dominio -> core
+type = layers
+layers =
+    rig.eval
+    rig.api
+    rig.agents
+    rig.ingestion | rig.retrieval | rig.audit | rig.integrations
+    rig.core
+
+# ── 2. Produção nunca depende do harness de avaliação ──
+[importlinter:contract:no-eval-in-prod]
+name = Producao nao importa rig.eval
+type = forbidden
+source_modules =
+    rig.api
+    rig.agents
+    rig.ingestion
+    rig.retrieval
+    rig.audit
+    rig.integrations
+    rig.core
+forbidden_modules =
+    rig.eval
+
+# ── 3. Agente não busca dado: ingestão é plano offline ──
+[importlinter:contract:agents-no-ingestion]
+name = rig.agents nao importa rig.ingestion
+type = forbidden
+source_modules =
+    rig.agents
+forbidden_modules =
+    rig.ingestion
+
+# ── 4. O domínio não conhece transporte: nada em audit/retrieval importa integrations ──
+[importlinter:contract:domain-ignores-transport]
+name = Dominio e retrieval nao importam integrations
+type = forbidden
+source_modules =
+    rig.audit
+    rig.retrieval
+forbidden_modules =
+    rig.integrations
