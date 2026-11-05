@@ -30,3 +30,6 @@ reports/*.html
 Thumbs.db
 .idea/
 .vscode/
+
+# Worktrees do Kanban (gerados por task, nunca versionados)
+.worktrees/
