@@ -143,6 +143,20 @@ Detalhes que quebram na prática e já estão resolvidos na spec:
 - Rerank local roda em CPU (bge-reranker-v2-m3, batch 16). Custo zero, ~200 ms para 50 candidatos em máquina modesta. Cohere fica como alternativa configurável se houver chave.
 - Filtro de metadado é aplicado **antes** do ANN (`WHERE` no `SELECT`, com índice parcial), não depois — senão o recall despenca em tema raro.
 
+### Embedding: local, `BAAI/bge-m3`, 1024 dimensões
+
+Decisão registrada em [ADR-011](09-decisions.md). Consequência direta no schema: `chunks.embedding vector(1024)`.
+
+| | bge-m3 (local) | Gemini `embedding-001` |
+|---|---|---|
+| Custo por 1k docs | R$ 0 | ~US$ 0,10–0,40 |
+| Depende de chave | não | sim |
+| Português | multilíngue treinado em PT, forte em texto longo | forte |
+| Velocidade | ~30–60 chunks/s em CPU (a medir) | latência de rede |
+| Reprodutibilidade | total (modelo versionado por hash) | depende do provedor |
+
+O avaliador consegue clonar o repo e rodar `make ingest` **sem conta em provedor nenhum**. Isso não é detalhe de conveniência: é o que faz o projeto ser executável por quem avalia. O F5 mede `recall@8` das duas opções no golden set de 40 consultas e publica a diferença — se o local perder feio, a decisão é revista com número na mão, não com opinião.
+
 ## 8. Versionamento e reprodutibilidade
 
 - `data/manifest.json` — hash do corpus por documento, gerado na ingestão, commitado.

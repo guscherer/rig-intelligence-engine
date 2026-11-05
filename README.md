@@ -84,7 +84,7 @@ Decisões de arquitetura com o porquê: [`docs/09-decisions.md`](docs/09-decisio
 
 ## Stack
 
-`Python 3.11+` · `LangGraph` · `Pydantic v2` (strict) · `FastAPI` (async) · `Postgres 16` + `pgvector` + FTS português · `sentence-transformers` (cross-encoder local para rerank) · `Gemini Flash` para iteração, modelo forte só na redação final · `Ragas` + juiz de tom próprio · `Docker Compose` · `pytest` com LLM mockado · `ruff` + `mypy --strict` · `uv`
+`Python 3.11+` · `LangGraph` · `Pydantic v2` (strict) · `FastAPI` (async) · `Postgres 16` + `pgvector` + FTS português · `bge-m3` local (1024 dims, custo zero) + `bge-reranker` local · `Gemini Flash` para iteração, modelo forte só na redação final · `Ragas` + juiz de tom próprio · `Docker Compose` · `pytest` com LLM mockado · `ruff` + `mypy --strict` + `import-linter` · `uv`
 
 ## Como rodar
 
@@ -100,7 +100,7 @@ Verificado em 2026-11-05 (Docker 29.9.3 / Compose v5.7.0, WSL2 Ubuntu 26.04):
 
 | Check | Resultado |
 |---|---|
-| `pgvector` HNSW em `vector(768)` | índice criado |
+| `pgvector` HNSW em `vector(1024)` (dim do bge-m3) | índice criado |
 | `immutable_unaccent()` + coluna `tsvector` gerada | índice GIN criado |
 | Configuração `pt_unaccent` (stemmer português) | `'inteligência artificial'` → `'inteligenc':1 'artificial':2` |
 | `pg_trgm` disponível | ok |

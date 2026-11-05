@@ -133,3 +133,21 @@ Formato curto: contexto → decisão → consequência → o que foi rejeitado. 
 **Risco aceito.** Um avaliador raso pode ler "monólito" como imaturidade. A defesa é este ADR com os números, não a omissão da decisão. Candidato que sabe *por que não* distribuir é mais sênior que o que distribui por default.
 
 **Rejeitado.** Microserviços por domínio (4 serviços para ~4k LOC = 1 serviço por 1k linhas, com 4 Dockerfiles, 4 pipelines e contratos entre eles); service mesh; event bus para um fluxo que é sequencial.
+
+---
+
+## ADR-011 — Embedding local (`bge-m3`, 1024 dims)
+
+**Contexto.** Literalmente, tudo no projeto depende de vetor: retrieval, avaliação de recall, ingestão. Usar o embedding do provedor de geração amarra F0/F1/F5 a uma chave de API e a um custo por documento — e a vaga é justamente sobre rodar isso dentro de uma empresa, onde conta de API é processo de compras.
+
+**Decisão.** `BAAI/bge-m3` via `sentence-transformers`, 1024 dimensões, rodando em CPU no plano offline.
+
+**Por quê.** (1) Elimina o bloqueio de credencial: o repo roda ponta a ponta sem conta em provedor. (2) Custo marginal zero por documento, o que importa porque a ingestão é reprocessável. (3) Multilíngue com bom desempenho em português institucional longo. (4) Reprodutibilidade real — o modelo tem hash, a API do provedor muda de versão sem avisar.
+
+**Consequência.** Custo de 4 KB por vetor: 100k chunks ≈ 400 MB, 2 M chunks ≈ 8 GB. Ingestão ganha custo de CPU (~30–60 chunks/s, a medir no F0) em vez de custo de token. O schema fixa `vector(1024)` — dimensão errada não dá erro na criação do índice, só degrada a busca silenciosamente, então está amarrada em `EMBEDDING_DIM` e validada no startup.
+
+**Risco aceito.** bge-m3 pode perder para um modelo de fronteira em nuance semântica. Mitigação: F5 compara `recall@8` das duas opções no mesmo golden set de 40 consultas e publica a diferença. Se o local perder >10%, a decisão muda com número, não com opinião.
+
+**Rejeitado.** Gemini `embedding-001` (bloqueio de chave + custo por doc), OpenAI `text-embedding-3` (idem, e menos forte em PT que bge-m3), `e5-small` (384 dims, mais barato de rodar e claramente mais fraco em texto jurídico longo).
+
+---
