@@ -2,7 +2,7 @@
 
 **Um radar legislativo com rastro de evidência: transforma proposições da Câmara dos Deputados em posicionamento institucional auditável, com revisão humana no meio do caminho.**
 
-> Status: **spec** (F0 não iniciado). Números de avaliação só entram aqui depois de medidos — este README não publica métrica estimada.
+> Status: **spec + infra** (F0 ainda não iniciado). Números de avaliação só entram aqui depois de medidos — este README não publica métrica estimada.
 
 ---
 
@@ -86,15 +86,32 @@ Decisões de arquitetura com o porquê: [`docs/09-decisions.md`](docs/09-decisio
 
 ## Como rodar
 
-Ainda não implementado (F0 é a próxima fase). O alvo é:
+**Infraestrutura: pronta e verificada.** Postgres 16 + pgvector + Redis sobem em Docker Compose.
 
 ```bash
-cp .env.example .env      # GEMINI_API_KEY, SLACK_*, DATABASE_URL
-docker compose up -d      # postgres+pgvector, api, worker
-make ingest               # baixa e indexa o corpus real
-make demo                 # PL 2338/2023 ponta a ponta até o card no Slack
-make eval                 # golden set + relatório
+cp .env.example .env
+docker compose up -d          # rig-db (pgvector/pg16) + rig-redis
+docker compose ps             # ambos devem reportar (healthy)
 ```
+
+Verificado em 2026-11-05 (Docker 29.9.3 / Compose v5.7.0, WSL2 Ubuntu 26.04):
+
+| Check | Resultado |
+|---|---|
+| `pgvector` HNSW em `vector(768)` | índice criado |
+| `immutable_unaccent()` + coluna `tsvector` gerada | índice GIN criado |
+| Configuração `pt_unaccent` (stemmer português) | `'inteligência artificial'` → `'inteligenc':1 'artificial':2` |
+| `pg_trgm` disponível | ok |
+
+**Pipeline: ainda não implementado** (F0 é a próxima fase). O alvo:
+
+```bash
+make ingest                   # baixa e indexa o corpus real da Câmara
+make demo                     # PL 2338/2023 ponta a ponta até o card no Slack
+make eval                     # golden set + relatório com CI
+```
+
+> **Nota de ambiente:** o Docker aqui roda como Docker Engine *dentro* do WSL2 (Ubuntu), não Docker Desktop. Em outra máquina, Docker Desktop ou Engine nativo funcionam igual — o compose não depende do WSL.
 
 ## Contexto
 
