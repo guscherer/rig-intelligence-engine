@@ -1,0 +1,94 @@
+# Mapa de mandato — EMPRESA FICTÍCIA, apenas para demonstração.
+# Trocar este arquivo (e re-rotular o golden set) adapta o motor para outra organização.
+nome: Empresa Demo S.A.
+setor: indústria de tecnologia industrial
+atuacao: [SP, MG, PR, BA, PE]
+descricao_curta: >
+  Fabricante de equipamentos e software embarcado com plantas em quatro estados,
+  cadeia de importação relevante e contratos com o setor público.
+
+mandato:
+  - eixo: tributario
+    palavras_chave:
+      - tributação
+      - ICMS
+      - PIS
+      - COFINS
+      - reforma tributária
+      - incentivo fiscal
+      - Zona Franca de Manaus
+      - crédito presumido
+      - substituição tributária
+    sensibilidade: 5
+
+  - eixo: dados_e_ia
+    palavras_chave:
+      - dados pessoais
+      - LGPD
+      - inteligência artificial
+      - algoritmos
+      - plataformas digitais
+      - segurança cibernética
+      - internet das coisas
+    sensibilidade: 5
+
+  - eixo: trabalho
+    palavras_chave:
+      - CLT
+      - jornada
+      - terceirização
+      - contribuição sindical
+      - trabalho remoto
+      - saúde do trabalhador
+    sensibilidade: 3
+
+  - eixo: ambiental
+    palavras_chave:
+      - licenciamento
+      - resíduos sólidos
+      - logística reversa
+      - emissões
+      - mercado de carbono
+      - recursos hídricos
+    sensibilidade: 3
+
+  - eixo: comercio_exterior
+    palavras_chave:
+      - importação
+      - exportação
+      - tarifa
+      - antidumping
+      - ex-tarifário
+      - drawback
+      - barreira sanitária
+    sensibilidade: 3
+
+# Temas da Câmara que sempre ativam revisão, mesmo sem match lexical.
+temas_gatilho:
+  - Ciência, Tecnologia e Inovação
+  - Trabalho e Emprego
+  - Indústria e Comércio
+  - Meio Ambiente e Desenvolvimento Sustentável
+
+# O sistema deve RECUSAR posicionamento sobre estes temas (curto-circuito).
+linhas_vermelhas:
+  - matéria eleitoral
+  - nomeação ou exoneração de autoridade
+  - conflito de interesse de pessoa física
+  - homenagem, denominação de via ou efeméride
+  - pedido de parecer jurídico
+
+# Tom de voz institucional (usado pelo juiz de tom e pelo few-shot).
+tom:
+  registro: formal contemporâneo
+  pessoa: impessoal, institucional
+  max_frase_palavras: 35
+  proibido:
+    - superlativo absoluto
+    - ataque a ator político
+    - promessa de resultado
+    - juízo de constitucionalidade
+  preferir:
+    - voz ativa com sujeito institucional explícito
+    - quantificação quando houver dado de fonte
+    - escopo declarado ("nos termos do art. X")

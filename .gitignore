@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Segredos
+.env
+*.pem
+
+# Corpus: texto de terceiros não é versionado (ADR-009).
+# Apenas data/manifest.json é commitado.
+data/raw/
+data/extracted/
+data/pdf/
+!data/manifest.json
+
+# Artefatos
+reports/*.html
+!reports/*.md
+!reports/*.json
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
