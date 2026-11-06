@@ -1,0 +1,32 @@
+{
+  "id": 2644408,
+  "siglaTipo": "PL",
+  "numero": 3878,
+  "ano": 2024,
+  "ementa": "Altera a Lei nº 12.319, de 1º de setembro de 2010, que regulamenta a profissão de tradutor, intérprete e guia-intérprete da Língua Brasileira de Sinais (Libras), para incluir a exigência de aprovação em banca de avaliação prática e de competências.",
+  "urlInteiroTeor": "https://www.camara.leg.br/proposicoesWeb/prop_mostrarintegra?codteor=3174690",
+  "dataApresentacao": "2026-08-24T16:30",
+  "author": "Senado Federal - Castellar Neto",
+  "autores": [
+    {
+      "uri": "https://dadosabertos.camara.leg.br/api/v2/orgaos/78",
+      "nome": "Senado Federal - Castellar Neto",
+      "codTipo": 40000,
+      "tipo": "Órgão do Poder Legislativo",
+      "ordemAssinatura": 1,
+      "proponente": 1
+    }
+  ],
+  "source": "camara",
+  "doc_id": "2644408",
+  "doc_type": "proposicao",
+  "extraction_quality": "high",
+  "page_count": 3,
+  "char_count": 3497,
+  "expected_chunk_ids": [
+    "cam:2644408:preambulo:01",
+    "cam:2644408:a1:02",
+    "cam:2644408:a2:03",
+    "cam:2644408:a3:04"
+  ]
+}

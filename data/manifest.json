@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-11-05",
+  "dataset_version": "corpus-v0-2026-11-05",
+  "scope": "F0 - 2 proposicoes pequenas (fixtures commitadas) usadas na validacao E2E",
+  "documents": [
+    {
+      "source": "camara",
+      "doc_id": "2644408",
+      "title": "PL 3878/2024",
+      "author": "Senado Federal - Castellar Neto",
+      "data_apresentacao": "2026-08-24T16:30",
+      "url_inteiro_teor": "https://www.camara.leg.br/proposicoesWeb/prop_mostrarintegra?codteor=3174690",
+      "page_count": 3,
+      "char_count": 3497,
+      "extraction_quality": "high",
+      "chunks": 4,
+      "content_hash": "sha256:55b0abf0371e53bc7c79a2461ced19ebe498ad03675b16fc47cb22654f5b8574",
+      "chunk_content_hashes": [
+        "sha256:1cc74bb1bf1593db126cf651bd7a5e065434954faa00b7c771c535393ecf675f",
+        "sha256:d122951c4ea850a697b9ccda23f53d05fc270658a7ed75d4a43755ff7af73631",
+        "sha256:3713a1f1baa5f0f199221e4696c574b975dd29656d6cec9e4980a59979017293",
+        "sha256:2095af84e0b90508acd63a72d6ae8fb085e1ec3cb4dd9a7d41e54399e0ac9dc4"
+      ],
+      "license": "dados abertos - Camara dos Deputados, uso livre com atribuicao",
+      "timing_seconds": {
+        "extract": 0.1736,
+        "chunk": 0.001
+      }
+    },
+    {
+      "source": "camara",
+      "doc_id": "2646598",
+      "title": "PL 2220/2024",
+      "author": "Senado Federal - Alan Rick",
+      "data_apresentacao": "2026-09-16T16:34",
+      "url_inteiro_teor": "https://www.camara.leg.br/proposicoesWeb/prop_mostrarintegra?codteor=3180874",
+      "page_count": 1,
+      "char_count": 1695,
+      "extraction_quality": "high",
+      "chunks": 3,
+      "content_hash": "sha256:29a5e41bff264fd006e10c1da40a872301a9f467d9850374b8db9c16ebde2a42",
+      "chunk_content_hashes": [
+        "sha256:ba1334f8d30706e13906d53bd8de6905d86b37517ee56f3c0915a55444462751",
+        "sha256:f99d7f53e437aafc3441c7f1530d2c57aa7e68f609d9f2602841b4bb5792f6a9",
+        "sha256:f0fdc8ea144d85b6588ac71e38cd3cbf6dac6dc3cde0052f8e189cfa20f444d7"
+      ],
+      "license": "dados abertos - Camara dos Deputados, uso livre com atribuicao",
+      "timing_seconds": {
+        "extract": 0.0139,
+        "chunk": 0.007
+      }
+    }
+  ],
+  "totals": {
+    "documents": 2,
+    "chunks": 7
+  },
+  "timing": {
+    "extraction_and_chunking_seconds": 0.2097,
+    "note": "Medido localmente em 2026-11-05 (extração PDF + chunking). Ingestão em Postgres não disponível neste ambiente; testes de integração fazem skip."
+  }
+}

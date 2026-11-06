@@ -2,7 +2,7 @@
 
 **Um radar legislativo com rastro de evidência: transforma proposições da Câmara dos Deputados em posicionamento institucional auditável, com revisão humana no meio do caminho.**
 
-> Status: **spec + infra** (F0 ainda não iniciado). Números de avaliação só entram aqui depois de medidos — este README não publica métrica estimada.
+> Status: **F0 concluído** (ingestão real). Números abaixo são medidos em 2026-11-05 sobre o corpus v0 (2 proposições pequenas). Números de avaliação (F5) só entram depois de medidos.
 
 ---
 
@@ -86,6 +86,17 @@ Decisões de arquitetura com o porquê: [`docs/09-decisions.md`](docs/09-decisio
 
 `Python 3.11+` · `LangGraph` · `Pydantic v2` (strict) · `FastAPI` (async) · `Postgres 16` + `pgvector` + FTS português · `bge-m3` local (1024 dims, custo zero) + `bge-reranker` local · `Gemini Flash` para iteração, modelo forte só na redação final · `Ragas` + juiz de tom próprio · `Docker Compose` · `pytest` com LLM mockado · `ruff` + `mypy --strict` + `import-linter` · `uv`
 
+## F0 — Ingestão real (medido)
+
+| Métrica | Valor medido |
+|---|---|
+| Documentos ingeridos | 2 |
+| Chunks gerados | 7 |
+| Tempo de extração + chunking (2 docs) | 0,21 s |
+| Taxa de chunks com `kind` válido | 7/7 (100%) |
+
+Corpus: PL 3878/2024 (3 páginas, 4 chunks) e PL 2220/2024 (1 página, 3 chunks), ambos da Câmara dos Deputados, com atribuição. Hashes e metadados em [`data/manifest.json`](data/manifest.json). Texto integral não é versionado (ADR-009); obtido via `make ingest` (requer rede).
+
 ## Como rodar
 
 **Infraestrutura: pronta e verificada.** Postgres 16 + pgvector + Redis sobem em Docker Compose.
@@ -105,7 +116,7 @@ Verificado em 2026-11-05 (Docker 29.9.3 / Compose v5.7.0, WSL2 Ubuntu 26.04):
 | Configuração `pt_unaccent` (stemmer português) | `'inteligência artificial'` → `'inteligenc':1 'artificial':2` |
 | `pg_trgm` disponível | ok |
 
-**Pipeline: ainda não implementado** (F0 é a próxima fase). O alvo:
+**F0 concluído:** ingestão real disponível (fixtures offline + suíte E2E). Próximo: F1 (retrieval híbrido). O alvo:
 
 ```bash
 make ingest                   # baixa e indexa o corpus real da Câmara

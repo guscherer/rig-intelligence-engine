@@ -21,7 +21,9 @@ Regra: se uma falha foi encontrada e não está aqui, o registro está incomplet
 
 ## Registro
 
-_Nenhuma falha registrada — projeto em fase de spec (F0 não iniciado)._
+_Nenhuma encontrada em F0._
+
+Registrado em 2026-11-05 após fechamento da F0: nenhuma falha real observada durante F0.1–F0.5 (CamaraClient, extração PDF, chunker, schema/store, fixtures E2E). Suíte `tests/ingestion` verde; `make check` verde.
 
 <!--
 Modelos de falhas que a spec já antecipa e que serão registradas quando ocorrerem:
