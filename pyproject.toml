@@ -10,6 +10,8 @@ dependencies = [
     "pydantic-settings>=2.5",
     "httpx>=0.27",
     "structlog>=24.4",
+    "pymupdf>=2.1",
+    "asyncpg>=0.29",
 ]
 
 [project.optional-dependencies]
@@ -116,6 +118,7 @@ addopts = "-q --strict-markers"
 markers = [
     "live: chama API ou provedor real (excluído do CI padrão)",
     "slow: leva mais de 5 s",
+    "integration: exige Postgres real do compose up",
 ]
 filterwarnings = ["error::DeprecationWarning"]
 

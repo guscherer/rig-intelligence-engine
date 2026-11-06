@@ -3,7 +3,7 @@
 PY := uv run
 SRC := src
 
-.PHONY: help install check lint format type arch test test-live size clean up down
+.PHONY: help install check lint format type arch test test-live size clean up down ingest-smoke
 
 help:
 > @echo "install  - cria venv e instala deps (dev)"
@@ -46,6 +46,9 @@ test:
 
 test-live:
 > $(PY) pytest -m live
+
+ingest-smoke:
+> $(PY) pytest -m integration tests/integration/test_ingest_e2e.py -q
 
 up:
 > docker compose up -d

@@ -1,0 +1,31 @@
+{
+  "id": 2646598,
+  "siglaTipo": "PL",
+  "numero": 2220,
+  "ano": 2024,
+  "ementa": "Altera a Lei nº 7.713, de 22 de dezembro de 1988, para inserir a linfangioleiomiomatose entre as doenças que dão causa à isenção do Imposto sobre a Renda das Pessoas Físicas relativo aos proventos de aposentadoria, reforma ou pensão.",
+  "urlInteiroTeor": "https://www.camara.leg.br/proposicoesWeb/prop_mostrarintegra?codteor=3180874",
+  "dataApresentacao": "2026-09-16T16:34",
+  "author": "Senado Federal - Alan Rick",
+  "autores": [
+    {
+      "uri": "https://dadosabertos.camara.leg.br/api/v2/orgaos/78",
+      "nome": "Senado Federal - Alan Rick",
+      "codTipo": 40000,
+      "tipo": "Órgão do Poder Legislativo",
+      "ordemAssinatura": 1,
+      "proponente": 1
+    }
+  ],
+  "source": "camara",
+  "doc_id": "2646598",
+  "doc_type": "proposicao",
+  "extraction_quality": "high",
+  "page_count": 1,
+  "char_count": 1695,
+  "expected_chunk_ids": [
+    "cam:2646598:preambulo:01",
+    "cam:2646598:a1:02",
+    "cam:2646598:a2:03"
+  ]
+}
