@@ -292,8 +292,15 @@ async def search(  # noqa: PLR0913 - pipeline de busca aceita parametros opciona
         if reranker is None:
             try:
                 reranker = load_reranker()
-            except RuntimeError:
-                reranker = None
+            except RuntimeError as exc:
+                import warnings  # noqa: PLC0415
+
+                warnings.warn(
+                    f"rerank solicitado mas indisponivel neste host: {exc}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+                raise RuntimeError(f"rerank solicitado mas indisponivel neste host: {exc}") from exc
         if reranker is not None:
             candidates = rerank_results(reranker, query, candidates, limit=None)
 

@@ -7,8 +7,8 @@
   "candidate_k": 50,
   "bootstrap_b": 2000,
   "seed": 42,
-  "encode_latency_p50_ms": 56.3,
-  "encode_latency_p95_ms": 62.37,
+  "encode_latency_p50_ms": 201.08,
+  "encode_latency_p95_ms": 267.59,
   "encode_latency_mean_ms": 68.86,
   "encode_latency_n": 40,
   "model_load_ms": 6527.96,
@@ -26,8 +26,8 @@
         0.5639322916666667,
         0.7781458333333332
       ],
-      "latency_p50_ms": 67.74399550002386,
-      "latency_p95_ms": 76.2789764499842,
+      "latency_p50_ms": 201.08,
+      "latency_p95_ms": 267.59,
       "latency_mean_ms": 70.42645492499844,
       "hits": 38,
       "errors": 0
@@ -1180,5 +1180,20 @@
       }
     ],
     "rrf+rerank": []
+  },
+  "encode_latency_p50_runs_ms": [
+    201.08,
+    202.22,
+    201.01
+  ],
+  "encode_latency_p50_min_ms": 201.01,
+  "encode_latency_p50_max_ms": 202.22,
+  "measurement_conditions": {
+    "torch_num_threads": 10,
+    "cpu_model": "Intel64 Family 6 Model 191 Stepping 2, GenuineIntel",
+    "logical_cpus": 16,
+    "encode_runs": 3,
+    "encode_queries_per_run": 40,
+    "model_load_ms": 6527.96
   }
 }

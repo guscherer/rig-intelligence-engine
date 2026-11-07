@@ -55,7 +55,7 @@ def _percentile(values: list[float], p: float) -> float:
     return ordered[lo] * (1 - frac) + ordered[hi] * frac
 
 
-async def _run_variant(  # noqa: PLR0915 - benchmark orquestra variantes, metricas, CI e relatorio por consulta
+async def _run_variant(  # noqa: PLR0915, C901 - benchmark orquestra variantes, metricas, CI e relatorio por consulta
     pool,
     encoder,
     reranker,
@@ -176,7 +176,7 @@ async def _run_variant(  # noqa: PLR0915 - benchmark orquestra variantes, metric
     }
 
 
-def render_report(
+def render_report(  # noqa: PLR0915
     results: list[dict[str, Any]],
     run_date: str,
     corpus_version: str,
@@ -234,10 +234,28 @@ def render_report(
         f"p50={best['latency_p50_ms']:.1f}ms, p95={best['latency_p95_ms']:.1f}ms)."
     )
     lines.append("")
+    dense_r = next((r for r in results if r.get("variant") == "dense"), None)
+    rrf_r = next((r for r in results if r.get("variant") == "rrf"), None)
+    if dense_r is not None and dense_r.get("recall_at_8") is not None:
+        dense_bit = (
+            f"dense recall@8={dense_r['recall_at_8']:.3f}, IC95 "
+            f"[{dense_r['recall_ci_95'][0]:.3f}, {dense_r['recall_ci_95'][1]:.3f}]"
+        )
+    else:
+        dense_bit = "dense recall@8=n/a"
+    if rrf_r is not None and rrf_r.get("recall_at_8") is not None:
+        rrf_bit = (
+            f"rrf recall@8={rrf_r['recall_at_8']:.3f}, IC95 "
+            f"[{rrf_r['recall_ci_95'][0]:.3f}, {rrf_r['recall_ci_95'][1]:.3f}]"
+        )
+    else:
+        rrf_bit = "rrf recall@8=n/a"
     lines.append(
-        "Decisão: empate estatístico em n=40 (dense recall@8=0.950, IC95 "
-        "[0.875, 1.000] vs. rrf 0.925, IC95 [0.825, 1.000] — diferença de "
-        "uma consulta, intervalos sobrepostos). O híbrido (RRF) não supera o "
+        "Decisão: empate estatístico ("
+        + dense_bit
+        + " vs. "
+        + rrf_bit
+        + " — intervalos sobrepostos). O híbrido (RRF) não supera o "
         "denso de forma estatisticamente relevante, e a afirmação recíproca "
         "também seria verdadeira. Mantém-se `dense` como default pela "
         "justificativa operacional: o encode da consulta já está no caminho, "
@@ -265,6 +283,11 @@ def render_report(
             f"Carregamento do modelo (amortizado, uma vez por processo): "
             f"{(model_load_ms / 1000.0) if model_load_ms is not None else 0.0:.1f} s."
         )
+        lines.append(
+            "- Encode: mediana de 3 execucoes (dispersao em "
+            "eval/results/recall_v1.json, measurement_conditions). "
+            "Condições (torch threads, CPU) registradas no JSON."
+        )
     lines.append(
         "- O número ~1010 ms reportado anteriormente corresponde a medição que "
         "incluía carga/amortização do modelo; o encode por consulta, com modelo "
@@ -279,27 +302,55 @@ def render_report(
     return "\n".join(lines)
 
 
-async def main() -> None:
+async def main() -> None:  # noqa: PLR0915
     with GOLDEN_PATH.open(encoding="utf-8") as f:
         golden = yaml.safe_load(f)
     items = golden["items"]
     corpus_version = golden.get("dataset_version", "unknown")
 
+    # Conecta ao banco antes de carregar o encoder (memoria), para estabilidade.
+    pool = await asyncpg.create_pool(_database_url(), min_size=1, max_size=5)
+
     # Medicao isolada do encode por consulta (mesma execucao do benchmark).
     # Lazy import torch-heavy stack once.
+    import platform  # noqa: PLC0415
+
+    import torch  # noqa: PLC0415 - lazy import do stack torch
+
     from rig.retrieval.embed import encode_texts, load_encoder  # noqa: PLC0415 - lazy import do stack torch para manter gate verde sem extra embed
 
     model_load_start = time.perf_counter()
     encoder = load_encoder()
     model_load_ms = (time.perf_counter() - model_load_start) * 1000.0
 
-    encode_times_ms: list[float] = []
-    for item in items:
-        t0 = time.perf_counter()
-        encode_texts(encoder, [item["query"]])
-        encode_times_ms.append((time.perf_counter() - t0) * 1000.0)
+    # Warmup (descarta primeira passagem, evita JIT/cold-cache).
+    if items:
+        encode_texts(encoder, [items[0]["query"]])
 
-    pool = await asyncpg.create_pool(_database_url(), min_size=1, max_size=5)
+    # Protocolo de medicao (F1.6d): mediana de >=3 execucoes com dispersao.
+    n_encode_runs = 3
+    encode_run_p50s: list[float] = []
+    encode_run_p95s: list[float] = []
+    encode_all_times: list[list[float]] = []
+    for _run in range(n_encode_runs):
+        times: list[float] = []
+        for item in items:
+            t0 = time.perf_counter()
+            encode_texts(encoder, [item["query"]])
+            times.append((time.perf_counter() - t0) * 1000.0)
+        encode_all_times.append(times)
+        encode_run_p50s.append(_percentile(times, 50))
+        encode_run_p95s.append(_percentile(times, 95))
+
+    encode_times_ms = encode_all_times[0]
+    encode_p50_ms = statistics.median(encode_run_p50s)
+    encode_p95_ms = statistics.median(encode_run_p95s)
+    encode_run_p50_min = min(encode_run_p50s)
+    encode_run_p50_max = max(encode_run_p50s)
+
+    torch_threads = torch.get_num_threads()
+    cpu_model = platform.processor() or platform.machine()
+
     try:
         results = []
         for variant in VARIANTS:
@@ -349,8 +400,6 @@ async def main() -> None:
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     run_date = datetime.now(UTC).date().isoformat()
-    encode_p50_ms = _percentile(encode_times_ms, 50)
-    encode_p95_ms = _percentile(encode_times_ms, 95)
     payload = {
         "run_date": run_date,
         "corpus_version": corpus_version,
@@ -360,26 +409,35 @@ async def main() -> None:
         "candidate_k": CANDIDATE_K,
         "bootstrap_b": BOOTSTRAP_B,
         "seed": SEED,
+        "measurement_conditions": {
+            "torch_num_threads": torch_threads,
+            "cpu_model": cpu_model,
+            "logical_cpus": os.cpu_count(),
+            "encode_runs": n_encode_runs,
+            "encode_queries_per_run": len(items),
+            "model_load_ms": round(model_load_ms, 2),
+        },
         "encode_latency_p50_ms": round(encode_p50_ms, 2),
         "encode_latency_p95_ms": round(encode_p95_ms, 2),
         "encode_latency_mean_ms": (
             round(statistics.fmean(encode_times_ms), 2) if encode_times_ms else 0.0
         ),
         "encode_latency_n": len(encode_times_ms),
+        "encode_latency_p50_runs_ms": [round(x, 2) for x in encode_run_p50s],
+        "encode_latency_p50_min_ms": round(encode_run_p50_min, 2),
+        "encode_latency_p50_max_ms": round(encode_run_p50_max, 2),
         "model_load_ms": round(model_load_ms, 2),
         "variants": [{k: v for k, v in r.items() if k != "per_query"} for r in results],
         "per_query": {r["variant"]: r["per_query"] for r in results},
     }
     JSON_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    encode_p50 = _percentile(encode_times_ms, 50)
-    encode_p95 = _percentile(encode_times_ms, 95)
     report = render_report(
         results,
         run_date,
         corpus_version,
-        encode_p50_ms=encode_p50,
-        encode_p95_ms=encode_p95,
+        encode_p50_ms=encode_p50_ms,
+        encode_p95_ms=encode_p95_ms,
         model_load_ms=model_load_ms,
     )
     REPORT_PATH.write_text(report, encoding="utf-8")

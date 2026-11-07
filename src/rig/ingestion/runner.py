@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg  # type: ignore[import-untyped]  # asyncpg nao publica stubs tipados
 
 from rig.core.db import close_pool, get_pool
 from rig.ingestion.camara import CamaraClient, Proposition
@@ -114,8 +114,6 @@ def _manifest_entry(
         "sigla_tipo": prop.sigla_tipo,
         "numero": prop.numero,
         "ano": prop.ano or ano,
-        "ementa": prop.ementa,
-        "keywords": prop.keywords,
         "url_inteiro_teor": url,
         "data_apresentacao": prop.data_apresentacao,
         "page_count": extracted.page_count,
@@ -201,7 +199,7 @@ async def process_proposition(
         return result
 
 
-async def _process_scope(
+async def _process_scope(  # noqa: C901 - orquestra cursor, contadores e manifesto; refatoracao planejada
     client: CamaraClient,
     pool: asyncpg.Pool,
     tipo: str,
@@ -272,7 +270,7 @@ def _write_manifest(path: Path, stats: IngestStats, duration: float, retries: in
     path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-async def run_ingest(
+async def run_ingest(  # noqa: C901 - orquestra ingestao completa; refatoracao planejada
     *,
     client: CamaraClient | None = None,
     pool: Any | None = None,

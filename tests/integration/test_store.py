@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg  # type: ignore[import-untyped]  # asyncpg nao publica stubs tipados
 import pytest
 
 from rig.ingestion.chunker import chunk_document
