@@ -23,6 +23,19 @@ dev = [
     "pytest-cov>=5.0",
     "import-linter>=2.1",
 ]
+embed = [
+    "torch>=2.4",
+    "sentence-transformers>=3.0",
+]
+
+# Índice de wheels CPU-only para torch (sem CUDA).
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
 
 [build-system]
 requires = ["hatchling"]

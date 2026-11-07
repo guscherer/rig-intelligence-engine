@@ -195,6 +195,10 @@ class CamaraClient:
             body = body_path.read_bytes()
         except (OSError, ValueError):
             return None
+        headers = dict(meta.get("headers", {}))
+        headers.pop("content-encoding", None)
+        headers.pop("content-length", None)
+        meta["headers"] = headers
         return meta, body
 
     def _write_cache(self, key: str, response: httpx.Response) -> None:

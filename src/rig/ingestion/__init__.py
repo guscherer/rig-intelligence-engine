@@ -7,6 +7,10 @@ Interface publica deste pacote: exportar aqui, nunca importar de submodulo
 from rig.ingestion.camara import CamaraClient, Proposition
 from rig.ingestion.chunker import Chunk, chunk_document
 from rig.ingestion.pdf import ExtractedDoc, extract_pdf
+from rig.ingestion.runner import (
+    process_proposition,
+    run_ingest,
+)
 from rig.ingestion.store import (
     IngestCounters,
     ingest_run_record,
@@ -15,7 +19,7 @@ from rig.ingestion.store import (
     upsert_document,
 )
 
-__all__ = [
+__all__ = [  # extend
     "CamaraClient",
     "Chunk",
     "ExtractedDoc",
@@ -24,6 +28,8 @@ __all__ = [
     "chunk_document",
     "extract_pdf",
     "ingest_run_record",
+    "process_proposition",
+    "run_ingest",
     "upsert",
     "upsert_chunks",
     "upsert_document",
