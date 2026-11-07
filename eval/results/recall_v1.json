@@ -1,0 +1,1206 @@
+{
+  "run_date": "2026-11-07",
+  "corpus_version": "cam-2026-11-06",
+  "golden_path": "eval\\golden\\retrieval_v1.yaml",
+  "n_queries": 40,
+  "top_k": 8,
+  "candidate_k": 50,
+  "bootstrap_b": 2000,
+  "seed": 42,
+  "measurement_conditions": {
+    "torch_num_threads": 10,
+    "cpu_model": "AMD64",
+    "logical_cpus": 16,
+    "encode_runs": 3,
+    "encode_queries_per_run": 40,
+    "model_load_ms": 12543.28
+  },
+  "encode_latency_p50_ms": 196.97,
+  "encode_latency_p95_ms": 274.77,
+  "encode_latency_mean_ms": 202.61,
+  "encode_latency_n": 40,
+  "encode_latency_p50_runs_ms": [
+    200.73,
+    196.06,
+    196.97
+  ],
+  "encode_latency_p50_min_ms": 196.06,
+  "encode_latency_p50_max_ms": 200.73,
+  "model_load_ms": 12543.28,
+  "variants": [
+    {
+      "variant": "dense",
+      "n": 40,
+      "recall_at_8": 0.95,
+      "mrr_at_8": 0.6727083333333332,
+      "recall_ci_95": [
+        0.875,
+        1.0
+      ],
+      "mrr_ci_95": [
+        0.5639322916666667,
+        0.7781458333333332
+      ],
+      "latency_p50_ms": 259.5065999998951,
+      "latency_p95_ms": 334.6922700001869,
+      "latency_mean_ms": 267.545142499921,
+      "hits": 38,
+      "errors": 0
+    },
+    {
+      "variant": "sparse",
+      "n": 40,
+      "recall_at_8": 0.375,
+      "mrr_at_8": 0.3020833333333333,
+      "recall_ci_95": [
+        0.225,
+        0.525
+      ],
+      "mrr_ci_95": [
+        0.18125,
+        0.43755208333333306
+      ],
+      "latency_p50_ms": 1.511200000095414,
+      "latency_p95_ms": 2.1282999998220475,
+      "latency_mean_ms": 1.8083100000694685,
+      "hits": 15,
+      "errors": 0
+    },
+    {
+      "variant": "rrf",
+      "n": 40,
+      "recall_at_8": 0.925,
+      "mrr_at_8": 0.6870833333333333,
+      "recall_ci_95": [
+        0.825,
+        1.0
+      ],
+      "mrr_ci_95": [
+        0.57415625,
+        0.7979374999999999
+      ],
+      "latency_p50_ms": 256.11495000021023,
+      "latency_p95_ms": 317.35406500006314,
+      "latency_mean_ms": 261.7172925000432,
+      "hits": 37,
+      "errors": 0
+    },
+    {
+      "variant": "rrf+rerank",
+      "n": 0,
+      "recall_at_8": null,
+      "mrr_at_8": null,
+      "recall_ci_95": [
+        null,
+        null
+      ],
+      "mrr_ci_95": [
+        null,
+        null
+      ],
+      "latency_p50_ms": null,
+      "latency_p95_ms": null,
+      "latency_mean_ms": null,
+      "hits": 0,
+      "errors": 0,
+      "status": "not_measured",
+      "error": "inviavel neste host: OOM (~3.3 GB) + >10 min/consulta em CPU"
+    }
+  ],
+  "per_query": {
+    "dense": [
+      {
+        "query": "Como a proposta facilita a insercao de mulheres acima de 50 anos no mercado de trabalho?",
+        "gold": "cam:2532496:a1:02",
+        "variant": "dense",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 348.7,
+        "error": null
+      },
+      {
+        "query": "Art. 1.048 do CPC prioridade",
+        "gold": "cam:2414793:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 214.39,
+        "error": null
+      },
+      {
+        "query": "Que sancao se aplica a quem provoca queimada em area protegida?",
+        "gold": "cam:2408689:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 262.66,
+        "error": null
+      },
+      {
+        "query": "piso salarial zootecnista Lei 4.950-A",
+        "gold": "cam:2477373:a3:04",
+        "variant": "dense",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 231.4,
+        "error": null
+      },
+      {
+        "query": "A proposta obriga a veiculacao de campanha permanente em arenas esportivas?",
+        "gold": "cam:2527868:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 268.11,
+        "error": null
+      },
+      {
+        "query": "LCIND Certificado de Recebiveis da Indústria",
+        "gold": "cam:2413258:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 244.41,
+        "error": null
+      },
+      {
+        "query": "Quais sao os requisitos para exercer a profissao de procurador de seguros?",
+        "gold": "cam:2415855:a4:05",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 312.56,
+        "error": null
+      },
+      {
+        "query": "credenciamento SUS profissionais medicos liberais",
+        "gold": "cam:2413260:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 227.46,
+        "error": null
+      },
+      {
+        "query": "Como a proposta combate praticas irregulares na area de drogas?",
+        "gold": "cam:2416685:a1:02",
+        "variant": "dense",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 259.72,
+        "error": null
+      },
+      {
+        "query": "impedimento membros Conselho Diretor atividade privada",
+        "gold": "cam:2415613:a3:04",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 208.12,
+        "error": null
+      },
+      {
+        "query": "Qual o prazo prescricional para pretensao de indenizacao por danos?",
+        "gold": "cam:2408699:a1:04",
+        "variant": "dense",
+        "hit": true,
+        "rank": 5,
+        "latency_ms": 282.64,
+        "error": null
+      },
+      {
+        "query": "divulgacao mensagens tromboembolismo venoso aerodromos",
+        "gold": "cam:2601538:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 234.84,
+        "error": null
+      },
+      {
+        "query": "E pratica abusiva negar transporte de pet em voo?",
+        "gold": "cam:2413656:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 256.56,
+        "error": null
+      },
+      {
+        "query": "cultura oceanica curriculo escolar LDB",
+        "gold": "cam:2503835:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 223.34,
+        "error": null
+      },
+      {
+        "query": "Quais beneficios a empresas que adotarem regime especial de trabalho para acompanhamento?",
+        "gold": "cam:2527769:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 8,
+        "latency_ms": 329.28,
+        "error": null
+      },
+      {
+        "query": "Programa de Oftalmologia nas Escolas exames auditivos",
+        "gold": "cam:2413293:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 333.95,
+        "error": null
+      },
+      {
+        "query": "Hospitais devem manter comissao para prevencao de tromboembolismo venoso?",
+        "gold": "cam:2482708:a2:06",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 288.38,
+        "error": null
+      },
+      {
+        "query": "Programa Nacional de Estimulo a Mobilidade Academica Internacional TEA",
+        "gold": "cam:2414484:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 244.2,
+        "error": null
+      },
+      {
+        "query": "A proposta permite consulta publica do nome completo e CPF no sistema penitenciario?",
+        "gold": "cam:2432404:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 6,
+        "latency_ms": 272.17,
+        "error": null
+      },
+      {
+        "query": "Subsistema de Atencao as Doencas Raras Lei 8.080",
+        "gold": "cam:2414856:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 259.3,
+        "error": null
+      },
+      {
+        "query": "Aumenta a pena para porte de arma em instituicao de ensino?",
+        "gold": "cam:2410514:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 260.41,
+        "error": null
+      },
+      {
+        "query": "Semana Nacional de Limpeza das Praias e Oceanos conscientizacao",
+        "gold": "cam:2414945:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 280.19,
+        "error": null
+      },
+      {
+        "query": "Qual percentual minimo dos recursos do FUST deve ser destinado a determinada finalidade?",
+        "gold": "cam:2416432:a2:06",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 479.98,
+        "error": null
+      },
+      {
+        "query": "Cadastro Nacional de Monitoramento de Faccoes Criminosas",
+        "gold": "cam:2415881:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 247.2,
+        "error": null
+      },
+      {
+        "query": "Quantas cadeiras de rodas devem ser disponibilizadas em locais publicos?",
+        "gold": "cam:2415324:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 264.7,
+        "error": null
+      },
+      {
+        "query": "diretrizes capacitacao saude da familia hipertensos diabeticos",
+        "gold": "cam:2415668:a8:09",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 252.29,
+        "error": null
+      },
+      {
+        "query": "Quais sao as diretrizes da politica de saude mental nas universidades?",
+        "gold": "cam:2414487:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 259.29,
+        "error": null
+      },
+      {
+        "query": "relatorio anual de efetividade emissoes de LCDs",
+        "gold": "cam:2416733:a2:04",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 248.57,
+        "error": null
+      },
+      {
+        "query": "A proposta inclui festas judaicas no calendario oficial?",
+        "gold": "cam:2419864:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 227.77,
+        "error": null
+      },
+      {
+        "query": "licenca maternidade 180 dias CLT art. 392",
+        "gold": "cam:2416598:a1:04",
+        "variant": "dense",
+        "hit": true,
+        "rank": 3,
+        "latency_ms": 263.64,
+        "error": null
+      },
+      {
+        "query": "O que e considerado peca publicitaria para fins da lei?",
+        "gold": "cam:2485089:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 280.07,
+        "error": null
+      },
+      {
+        "query": "Tesouro Nacional depositara recursos Banco do Brasil conta especial",
+        "gold": "cam:2415585:a2:03",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 255.66,
+        "error": null
+      },
+      {
+        "query": "Qual data sera o Dia Nacional de Conscientizacao sobre a Sindrome de Edwards?",
+        "gold": "cam:2416758:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 283.75,
+        "error": null
+      },
+      {
+        "query": "priorizar abastecimento alimentar Sisan Lei 11.346",
+        "gold": "cam:2469474:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 256.36,
+        "error": null
+      },
+      {
+        "query": "Qual o piso salarial nacional de medico veterinario e zootecnista?",
+        "gold": "cam:2414193:a1:04",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 240.52,
+        "error": null
+      },
+      {
+        "query": "transferencia ex officio servidor publico estadual estudante",
+        "gold": "cam:2414944:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 3,
+        "latency_ms": 227.8,
+        "error": null
+      },
+      {
+        "query": "A proposta permite quitacao de multas administrativas com creditos tributarios?",
+        "gold": "cam:2625598:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 264.9,
+        "error": null
+      },
+      {
+        "query": "placas veiculares informem Municipio e Estado CTB",
+        "gold": "cam:2443622:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 262.69,
+        "error": null
+      },
+      {
+        "query": "Sobre quais operacoes incide a nova contribuicao de intervencao?",
+        "gold": "cam:2413243:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 241.36,
+        "error": null
+      },
+      {
+        "query": "doenca rara recebera gratuitamente tratamento no SUS",
+        "gold": "cam:2415320:a1:02",
+        "variant": "dense",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 302.47,
+        "error": null
+      }
+    ],
+    "sparse": [
+      {
+        "query": "Como a proposta facilita a insercao de mulheres acima de 50 anos no mercado de trabalho?",
+        "gold": "cam:2532496:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 12.14,
+        "error": null
+      },
+      {
+        "query": "Art. 1.048 do CPC prioridade",
+        "gold": "cam:2414793:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 2.19,
+        "error": null
+      },
+      {
+        "query": "Que sancao se aplica a quem provoca queimada em area protegida?",
+        "gold": "cam:2408689:a2:03",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.89,
+        "error": null
+      },
+      {
+        "query": "piso salarial zootecnista Lei 4.950-A",
+        "gold": "cam:2477373:a3:04",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 2.13,
+        "error": null
+      },
+      {
+        "query": "A proposta obriga a veiculacao de campanha permanente em arenas esportivas?",
+        "gold": "cam:2527868:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.93,
+        "error": null
+      },
+      {
+        "query": "LCIND Certificado de Recebiveis da Indústria",
+        "gold": "cam:2413258:a2:03",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.68,
+        "error": null
+      },
+      {
+        "query": "Quais sao os requisitos para exercer a profissao de procurador de seguros?",
+        "gold": "cam:2415855:a4:05",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.47,
+        "error": null
+      },
+      {
+        "query": "credenciamento SUS profissionais medicos liberais",
+        "gold": "cam:2413260:a2:03",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.65,
+        "error": null
+      },
+      {
+        "query": "Como a proposta combate praticas irregulares na area de drogas?",
+        "gold": "cam:2416685:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.84,
+        "error": null
+      },
+      {
+        "query": "impedimento membros Conselho Diretor atividade privada",
+        "gold": "cam:2415613:a3:04",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.64,
+        "error": null
+      },
+      {
+        "query": "Qual o prazo prescricional para pretensao de indenizacao por danos?",
+        "gold": "cam:2408699:a1:04",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.87,
+        "error": null
+      },
+      {
+        "query": "divulgacao mensagens tromboembolismo venoso aerodromos",
+        "gold": "cam:2601538:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.62,
+        "error": null
+      },
+      {
+        "query": "E pratica abusiva negar transporte de pet em voo?",
+        "gold": "cam:2413656:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.77,
+        "error": null
+      },
+      {
+        "query": "cultura oceanica curriculo escolar LDB",
+        "gold": "cam:2503835:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.17,
+        "error": null
+      },
+      {
+        "query": "Quais beneficios a empresas que adotarem regime especial de trabalho para acompanhamento?",
+        "gold": "cam:2527769:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.99,
+        "error": null
+      },
+      {
+        "query": "Programa de Oftalmologia nas Escolas exames auditivos",
+        "gold": "cam:2413293:a2:03",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.37,
+        "error": null
+      },
+      {
+        "query": "Hospitais devem manter comissao para prevencao de tromboembolismo venoso?",
+        "gold": "cam:2482708:a2:06",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.43,
+        "error": null
+      },
+      {
+        "query": "Programa Nacional de Estimulo a Mobilidade Academica Internacional TEA",
+        "gold": "cam:2414484:a2:03",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.89,
+        "error": null
+      },
+      {
+        "query": "A proposta permite consulta publica do nome completo e CPF no sistema penitenciario?",
+        "gold": "cam:2432404:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.56,
+        "error": null
+      },
+      {
+        "query": "Subsistema de Atencao as Doencas Raras Lei 8.080",
+        "gold": "cam:2414856:a1:02",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 3,
+        "latency_ms": 1.54,
+        "error": null
+      },
+      {
+        "query": "Aumenta a pena para porte de arma em instituicao de ensino?",
+        "gold": "cam:2410514:a2:03",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 1.78,
+        "error": null
+      },
+      {
+        "query": "Semana Nacional de Limpeza das Praias e Oceanos conscientizacao",
+        "gold": "cam:2414945:a2:03",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.22,
+        "error": null
+      },
+      {
+        "query": "Qual percentual minimo dos recursos do FUST deve ser destinado a determinada finalidade?",
+        "gold": "cam:2416432:a2:06",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.8,
+        "error": null
+      },
+      {
+        "query": "Cadastro Nacional de Monitoramento de Faccoes Criminosas",
+        "gold": "cam:2415881:a2:03",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.38,
+        "error": null
+      },
+      {
+        "query": "Quantas cadeiras de rodas devem ser disponibilizadas em locais publicos?",
+        "gold": "cam:2415324:a2:03",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.51,
+        "error": null
+      },
+      {
+        "query": "diretrizes capacitacao saude da familia hipertensos diabeticos",
+        "gold": "cam:2415668:a8:09",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.29,
+        "error": null
+      },
+      {
+        "query": "Quais sao as diretrizes da politica de saude mental nas universidades?",
+        "gold": "cam:2414487:a2:03",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.42,
+        "error": null
+      },
+      {
+        "query": "relatorio anual de efetividade emissoes de LCDs",
+        "gold": "cam:2416733:a2:04",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.45,
+        "error": null
+      },
+      {
+        "query": "A proposta inclui festas judaicas no calendario oficial?",
+        "gold": "cam:2419864:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.29,
+        "error": null
+      },
+      {
+        "query": "licenca maternidade 180 dias CLT art. 392",
+        "gold": "cam:2416598:a1:04",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.86,
+        "error": null
+      },
+      {
+        "query": "O que e considerado peca publicitaria para fins da lei?",
+        "gold": "cam:2485089:a2:03",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 0.97,
+        "error": null
+      },
+      {
+        "query": "Tesouro Nacional depositara recursos Banco do Brasil conta especial",
+        "gold": "cam:2415585:a2:03",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.51,
+        "error": null
+      },
+      {
+        "query": "Qual data sera o Dia Nacional de Conscientizacao sobre a Sindrome de Edwards?",
+        "gold": "cam:2416758:a1:02",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.16,
+        "error": null
+      },
+      {
+        "query": "priorizar abastecimento alimentar Sisan Lei 11.346",
+        "gold": "cam:2469474:a1:02",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 1.45,
+        "error": null
+      },
+      {
+        "query": "Qual o piso salarial nacional de medico veterinario e zootecnista?",
+        "gold": "cam:2414193:a1:04",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 1.46,
+        "error": null
+      },
+      {
+        "query": "transferencia ex officio servidor publico estadual estudante",
+        "gold": "cam:2414944:a1:02",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 1.46,
+        "error": null
+      },
+      {
+        "query": "A proposta permite quitacao de multas administrativas com creditos tributarios?",
+        "gold": "cam:2625598:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.09,
+        "error": null
+      },
+      {
+        "query": "placas veiculares informem Municipio e Estado CTB",
+        "gold": "cam:2443622:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.0,
+        "error": null
+      },
+      {
+        "query": "Sobre quais operacoes incide a nova contribuicao de intervencao?",
+        "gold": "cam:2413243:a1:02",
+        "variant": "sparse",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 1.33,
+        "error": null
+      },
+      {
+        "query": "doenca rara recebera gratuitamente tratamento no SUS",
+        "gold": "cam:2415320:a1:02",
+        "variant": "sparse",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 1.13,
+        "error": null
+      }
+    ],
+    "rrf": [
+      {
+        "query": "Como a proposta facilita a insercao de mulheres acima de 50 anos no mercado de trabalho?",
+        "gold": "cam:2532496:a1:02",
+        "variant": "rrf",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 288.67,
+        "error": null
+      },
+      {
+        "query": "Art. 1.048 do CPC prioridade",
+        "gold": "cam:2414793:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 207.92,
+        "error": null
+      },
+      {
+        "query": "Que sancao se aplica a quem provoca queimada em area protegida?",
+        "gold": "cam:2408689:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 263.62,
+        "error": null
+      },
+      {
+        "query": "piso salarial zootecnista Lei 4.950-A",
+        "gold": "cam:2477373:a3:04",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 232.24,
+        "error": null
+      },
+      {
+        "query": "A proposta obriga a veiculacao de campanha permanente em arenas esportivas?",
+        "gold": "cam:2527868:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 260.12,
+        "error": null
+      },
+      {
+        "query": "LCIND Certificado de Recebiveis da Indústria",
+        "gold": "cam:2413258:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 235.34,
+        "error": null
+      },
+      {
+        "query": "Quais sao os requisitos para exercer a profissao de procurador de seguros?",
+        "gold": "cam:2415855:a4:05",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 272.21,
+        "error": null
+      },
+      {
+        "query": "credenciamento SUS profissionais medicos liberais",
+        "gold": "cam:2413260:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 292.69,
+        "error": null
+      },
+      {
+        "query": "Como a proposta combate praticas irregulares na area de drogas?",
+        "gold": "cam:2416685:a1:02",
+        "variant": "rrf",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 240.37,
+        "error": null
+      },
+      {
+        "query": "impedimento membros Conselho Diretor atividade privada",
+        "gold": "cam:2415613:a3:04",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 207.19,
+        "error": null
+      },
+      {
+        "query": "Qual o prazo prescricional para pretensao de indenizacao por danos?",
+        "gold": "cam:2408699:a1:04",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 5,
+        "latency_ms": 316.17,
+        "error": null
+      },
+      {
+        "query": "divulgacao mensagens tromboembolismo venoso aerodromos",
+        "gold": "cam:2601538:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 247.54,
+        "error": null
+      },
+      {
+        "query": "E pratica abusiva negar transporte de pet em voo?",
+        "gold": "cam:2413656:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 248.58,
+        "error": null
+      },
+      {
+        "query": "cultura oceanica curriculo escolar LDB",
+        "gold": "cam:2503835:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 280.01,
+        "error": null
+      },
+      {
+        "query": "Quais beneficios a empresas que adotarem regime especial de trabalho para acompanhamento?",
+        "gold": "cam:2527769:a1:02",
+        "variant": "rrf",
+        "hit": false,
+        "rank": null,
+        "latency_ms": 304.01,
+        "error": null
+      },
+      {
+        "query": "Programa de Oftalmologia nas Escolas exames auditivos",
+        "gold": "cam:2413293:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 263.5,
+        "error": null
+      },
+      {
+        "query": "Hospitais devem manter comissao para prevencao de tromboembolismo venoso?",
+        "gold": "cam:2482708:a2:06",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 312.17,
+        "error": null
+      },
+      {
+        "query": "Programa Nacional de Estimulo a Mobilidade Academica Internacional TEA",
+        "gold": "cam:2414484:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 256.41,
+        "error": null
+      },
+      {
+        "query": "A proposta permite consulta publica do nome completo e CPF no sistema penitenciario?",
+        "gold": "cam:2432404:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 6,
+        "latency_ms": 263.68,
+        "error": null
+      },
+      {
+        "query": "Subsistema de Atencao as Doencas Raras Lei 8.080",
+        "gold": "cam:2414856:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 263.78,
+        "error": null
+      },
+      {
+        "query": "Aumenta a pena para porte de arma em instituicao de ensino?",
+        "gold": "cam:2410514:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 4,
+        "latency_ms": 339.84,
+        "error": null
+      },
+      {
+        "query": "Semana Nacional de Limpeza das Praias e Oceanos conscientizacao",
+        "gold": "cam:2414945:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 260.27,
+        "error": null
+      },
+      {
+        "query": "Qual percentual minimo dos recursos do FUST deve ser destinado a determinada finalidade?",
+        "gold": "cam:2416432:a2:06",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 255.82,
+        "error": null
+      },
+      {
+        "query": "Cadastro Nacional de Monitoramento de Faccoes Criminosas",
+        "gold": "cam:2415881:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 6,
+        "latency_ms": 265.19,
+        "error": null
+      },
+      {
+        "query": "Quantas cadeiras de rodas devem ser disponibilizadas em locais publicos?",
+        "gold": "cam:2415324:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 287.26,
+        "error": null
+      },
+      {
+        "query": "diretrizes capacitacao saude da familia hipertensos diabeticos",
+        "gold": "cam:2415668:a8:09",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 255.62,
+        "error": null
+      },
+      {
+        "query": "Quais sao as diretrizes da politica de saude mental nas universidades?",
+        "gold": "cam:2414487:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 264.03,
+        "error": null
+      },
+      {
+        "query": "relatorio anual de efetividade emissoes de LCDs",
+        "gold": "cam:2416733:a2:04",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 248.84,
+        "error": null
+      },
+      {
+        "query": "A proposta inclui festas judaicas no calendario oficial?",
+        "gold": "cam:2419864:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 239.37,
+        "error": null
+      },
+      {
+        "query": "licenca maternidade 180 dias CLT art. 392",
+        "gold": "cam:2416598:a1:04",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 5,
+        "latency_ms": 251.99,
+        "error": null
+      },
+      {
+        "query": "O que e considerado peca publicitaria para fins da lei?",
+        "gold": "cam:2485089:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 244.06,
+        "error": null
+      },
+      {
+        "query": "Tesouro Nacional depositara recursos Banco do Brasil conta especial",
+        "gold": "cam:2415585:a2:03",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 243.3,
+        "error": null
+      },
+      {
+        "query": "Qual data sera o Dia Nacional de Conscientizacao sobre a Sindrome de Edwards?",
+        "gold": "cam:2416758:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 356.73,
+        "error": null
+      },
+      {
+        "query": "priorizar abastecimento alimentar Sisan Lei 11.346",
+        "gold": "cam:2469474:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 244.12,
+        "error": null
+      },
+      {
+        "query": "Qual o piso salarial nacional de medico veterinario e zootecnista?",
+        "gold": "cam:2414193:a1:04",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 243.64,
+        "error": null
+      },
+      {
+        "query": "transferencia ex officio servidor publico estadual estudante",
+        "gold": "cam:2414944:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 212.07,
+        "error": null
+      },
+      {
+        "query": "A proposta permite quitacao de multas administrativas com creditos tributarios?",
+        "gold": "cam:2625598:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 271.52,
+        "error": null
+      },
+      {
+        "query": "placas veiculares informem Municipio e Estado CTB",
+        "gold": "cam:2443622:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 2,
+        "latency_ms": 251.85,
+        "error": null
+      },
+      {
+        "query": "Sobre quais operacoes incide a nova contribuicao de intervencao?",
+        "gold": "cam:2413243:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 248.25,
+        "error": null
+      },
+      {
+        "query": "doenca rara recebera gratuitamente tratamento no SUS",
+        "gold": "cam:2415320:a1:02",
+        "variant": "rrf",
+        "hit": true,
+        "rank": 1,
+        "latency_ms": 228.74,
+        "error": null
+      }
+    ],
+    "rrf+rerank": []
+  },
+  "provenance": {
+    "generated_by": "scripts/eval_retrieval.py",
+    "git_head": "d835ca628418d1800514f0e273211d600008f431",
+    "command": "uv run python scripts/eval_retrieval.py",
+    "log_sha256": "caae8a9f881011e1e266e95eb1f241bcd21a1cceb5e5e88ebf0af3ea66d93c62",
+    "report_sha256": "3c66f57f5da9870004a2b1102422f20773a5d2de9c92f2f73929156f040ac3d1"
+  }
+}

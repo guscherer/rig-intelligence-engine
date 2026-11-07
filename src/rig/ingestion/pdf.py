@@ -25,7 +25,7 @@ class ExtractedDoc(BaseModel):
 
 def extract_pdf(data: bytes) -> ExtractedDoc:
     """Extrai texto de um PDF, detectando scan e limpando cabeçalho/rodapé."""
-    doc: Any = cast(Any, pymupdf.open(stream=data, filetype="pdf"))  # type: ignore[no-untyped-call]
+    doc: Any = cast(Any, pymupdf.open(stream=data, filetype="pdf"))  # type: ignore[no-untyped-call]  # pymupdf nao tipado
     try:
         raw_pages = [_page_text(page) for page in doc]
         page_count = len(raw_pages)

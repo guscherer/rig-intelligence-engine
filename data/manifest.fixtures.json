@@ -1,7 +1,7 @@
 {
   "generated_at": "2026-11-05",
   "dataset_version": "corpus-v0-2026-11-05",
-  "scope": "F0 - 2 proposicoes pequenas (fixtures commitadas) usadas na validacao E2E",
+  "scope": "fixtures",
   "documents": [
     {
       "source": "camara",
@@ -58,5 +58,10 @@
   "timing": {
     "extraction_and_chunking_seconds": 0.2097,
     "note": "Medido localmente em 2026-11-05 (extração PDF + chunking). Ingestão em Postgres não disponível neste ambiente; testes de integração fazem skip."
+  },
+  "database_corpus": {
+    "documents": 293,
+    "chunks": 2441,
+    "note": "corpus real no Postgres (make ingest); este manifest descreve apenas as fixtures commitadas"
   }
 }

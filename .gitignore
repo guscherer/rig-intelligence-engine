@@ -14,11 +14,13 @@ htmlcov/
 *.pem
 
 # Corpus: texto de terceiros não é versionado (ADR-009).
-# Apenas data/manifest.json é commitado.
+# Manifesto das fixtures (commitado); manifesto do corpus (gerado por make ingest) é gitignored.
 data/raw/
 data/extracted/
 data/pdf/
-!data/manifest.json
+data/cache/
+data/manifest.json
+!data/manifest.fixtures.json
 
 # Artefatos
 reports/*.html

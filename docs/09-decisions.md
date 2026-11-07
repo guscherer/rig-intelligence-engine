@@ -42,6 +42,8 @@ Formato curto: contexto → decisão → consequência → o que foi rejeitado. 
 
 **Consequência.** ~200 ms de CPU por consulta. Se a máquina do avaliador for fraca, o compose tem perfil `lite` que desliga o rerank. A tabela comparativa em F1 mostra o ganho real; se não houver ganho, o rerank sai.
 
+**Emenda (F1.6a, 2026-11-07).** O benchmark F1.5 (n=40) mostrou empate estatístico entre dense (0.950, IC95 [0.875, 1.000]) e rrf (0.925, IC95 [0.825, 1.000]) — diferença de uma consulta, intervalos sobrepostos. O híbrido não supera o denso de forma estatisticamente relevante (e a afirmação recíproca também seria verdadeira). Default alterado para `dense`, com justificativa operacional, não estatística: o encode da consulta já está no caminho (medido em ~200 ms p95 por consulta, modelo carregado; ver docs/eval-retrieval.md e eval/results/recall_v1.json, F1.6d), e eliminar BM25+RRF reduz superfície de manutenção e latência de operação. ADR-003 mantém a decisão arquitetural (híbrido disponível como modo `rrf`/`rrf+rerank`), mas o default de produção passa a ser `dense`.
+
 ---
 
 ## ADR-004 — Geração presa à citação

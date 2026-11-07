@@ -1,0 +1,299 @@
+version: 1
+dataset_version: cam-2026-11-06
+label_status: provisional
+labels_by: builder (provisional; no domain specialist available)
+provisional: true
+n: 40
+description: Golden set de retrieval v1 (provisional). 40 consultas em linguagem de assessoria legislativa.
+provisional_note: 'Rotulo provisorio feito pelo autor do projeto (sem especialista de dominio). Quando houver especialista, 30 itens devem ser re-rotulados e o kappa autor x especialista publicado; metricas
+  derivadas carregam provisional: true.'
+distribution:
+  by_doc_type:
+    proposicao: 40
+  by_retrieval_profile:
+    dense_only: 20
+    sparse_only: 20
+  by_query_type:
+    paraphrase: 20
+    literal_term: 20
+items:
+- query: Como a proposta facilita a insercao de mulheres acima de 50 anos no mercado de trabalho?
+  chunk_ouro: cam:2532496:a1:02
+  doc_id: '2532496'
+  justificativa: Art. 1o altera o par. 2o do art. 16 da Lei 14.457/2022, dispositivo que trata da insercao de mulheres acima de 50 anos.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Art. 1.048 do CPC prioridade
+  chunk_ouro: cam:2414793:a1:02
+  doc_id: '2414793'
+  justificativa: Art. 1o da nova redacao ao art. 1.048 do CPC, que trata da prioridade processual.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Que sancao se aplica a quem provoca queimada em area protegida?
+  chunk_ouro: cam:2408689:a2:03
+  doc_id: '2408689'
+  justificativa: Art. 2o acrescenta o art. 40-B a Lei 9.605/98, tipificando o incendio em unidade de conservacao.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: piso salarial zootecnista Lei 4.950-A
+  chunk_ouro: cam:2477373:a3:04
+  doc_id: '2477373'
+  justificativa: Art. 3o altera a Lei 4.950-A para dispor sobre o piso salarial dos zootecnistas.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: A proposta obriga a veiculacao de campanha permanente em arenas esportivas?
+  chunk_ouro: cam:2527868:a1:02
+  doc_id: '2527868'
+  justificativa: Art. 1o altera as Leis da Timemania e Geral do Esporte para assegurar a veiculacao de campanha.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: LCIND Certificado de Recebiveis da Indústria
+  chunk_ouro: cam:2413258:a2:03
+  doc_id: '2413258'
+  justificativa: Art. 2o institui a Letra de Credito da Industria e o Certificado de Recebiveis da Industria.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Quais sao os requisitos para exercer a profissao de procurador de seguros?
+  chunk_ouro: cam:2415855:a4:05
+  doc_id: '2415855'
+  justificativa: Art. 4o lista os requisitos para o exercicio da profissao de Procurador de Seguros.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: credenciamento SUS profissionais medicos liberais
+  chunk_ouro: cam:2413260:a2:03
+  doc_id: '2413260'
+  justificativa: Art. 2o autoriza o credenciamento pelo SUS de profissionais medicos liberais e empresas.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Como a proposta combate praticas irregulares na area de drogas?
+  chunk_ouro: cam:2416685:a1:02
+  doc_id: '2416685'
+  justificativa: Art. 1o acrescenta arts. 26-B a 26-E a Lei 11.343/2006, tratando do Disque 100.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: impedimento membros Conselho Diretor atividade privada
+  chunk_ouro: cam:2415613:a3:04
+  doc_id: '2415613'
+  justificativa: Art. 3o altera o art. 8o da Lei 9.986/2000, impedindo membros do Conselho Diretor de atividade privada.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Qual o prazo prescricional para pretensao de indenizacao por danos?
+  chunk_ouro: cam:2408699:a1:04
+  doc_id: '2408699'
+  justificativa: Art. 1o acresce par. 6o ao art. 206 do Codigo Civil, fixando prazo de 20 anos.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: divulgacao mensagens tromboembolismo venoso aerodromos
+  chunk_ouro: cam:2601538:a1:02
+  doc_id: '2601538'
+  justificativa: Art. 1o acrescenta o art. 11-A a Lei 6.009/73, obrigando divulgacao de mensagens em aerodromos.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: E pratica abusiva negar transporte de pet em voo?
+  chunk_ouro: cam:2413656:a1:02
+  doc_id: '2413656'
+  justificativa: Art. 1o acrescenta o art. 39-A ao CDC, considerando pratica abusiva negar transporte de animais.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: cultura oceanica curriculo escolar LDB
+  chunk_ouro: cam:2503835:a1:02
+  doc_id: '2503835'
+  justificativa: Art. 1o altera o art. 26 da LDB para incluir a cultura oceanica no curriculo.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Quais beneficios a empresas que adotarem regime especial de trabalho para acompanhamento?
+  chunk_ouro: cam:2527769:a1:02
+  doc_id: '2527769'
+  justificativa: Art. 1o altera a Lei 11.770/2008 para prever beneficios a empresas com regime especial.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Programa de Oftalmologia nas Escolas exames auditivos
+  chunk_ouro: cam:2413293:a2:03
+  doc_id: '2413293'
+  justificativa: Art. 2o define o programa com exames auditivos para alunos da rede publica.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Hospitais devem manter comissao para prevencao de tromboembolismo venoso?
+  chunk_ouro: cam:2482708:a2:06
+  doc_id: '2482708'
+  justificativa: Art. 2o acrescenta o art. 1o-A a Lei 12.629/2012, criando comissao de prevencao.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Programa Nacional de Estimulo a Mobilidade Academica Internacional TEA
+  chunk_ouro: cam:2414484:a2:03
+  doc_id: '2414484'
+  justificativa: Art. 2o define as finalidades do programa de mobilidade academica para estudantes com TEA.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: A proposta permite consulta publica do nome completo e CPF no sistema penitenciario?
+  chunk_ouro: cam:2432404:a1:02
+  doc_id: '2432404'
+  justificativa: Art. 1o altera o art. 234-B do Codigo Penal para permitir consulta publica.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Subsistema de Atencao as Doencas Raras Lei 8.080
+  chunk_ouro: cam:2414856:a1:02
+  doc_id: '2414856'
+  justificativa: Art. 1o altera a Lei 8.080/90 para instituir o Subsistema de Atencao as Doencas Raras.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Aumenta a pena para porte de arma em instituicao de ensino?
+  chunk_ouro: cam:2410514:a2:03
+  doc_id: '2410514'
+  justificativa: Art. 2o altera o par. 1o do art. 19 do Decreto-Lei 3.688/41 sobre porte de arma em escola.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Semana Nacional de Limpeza das Praias e Oceanos conscientizacao
+  chunk_ouro: cam:2414945:a2:03
+  doc_id: '2414945'
+  justificativa: Art. 2o define o objetivo da Semana Nacional de Limpeza das Praias e Oceanos.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Qual percentual minimo dos recursos do FUST deve ser destinado a determinada finalidade?
+  chunk_ouro: cam:2416432:a2:06
+  doc_id: '2416432'
+  justificativa: Art. 2o altera o par. 2o do art. 5o da Lei 9.998/2000, fixando 50% dos recursos do FUST.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Cadastro Nacional de Monitoramento de Faccoes Criminosas
+  chunk_ouro: cam:2415881:a2:03
+  doc_id: '2415881'
+  justificativa: Art. 2o define a finalidade do Cadastro Nacional de Monitoramento de Faccoes Criminosas.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Quantas cadeiras de rodas devem ser disponibilizadas em locais publicos?
+  chunk_ouro: cam:2415324:a2:03
+  doc_id: '2415324'
+  justificativa: Art. 2o acrescenta paragrafos ao art. 12-A da Lei 10.098/2000 sobre cadeiras de rodas.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: diretrizes capacitacao saude da familia hipertensos diabeticos
+  chunk_ouro: cam:2415668:a8:09
+  doc_id: '2415668'
+  justificativa: Art. 8o estabelece diretrizes de capacitacao para acompanhamento de hipertensos e diabeticos.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Quais sao as diretrizes da politica de saude mental nas universidades?
+  chunk_ouro: cam:2414487:a2:03
+  doc_id: '2414487'
+  justificativa: Art. 2o lista as diretrizes da Politica de Saude Mental nas Instituicoes de Ensino Superior.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: relatorio anual de efetividade emissoes de LCDs
+  chunk_ouro: cam:2416733:a2:04
+  doc_id: '2416733'
+  justificativa: Art. 2o obriga a instituicao emissora a disponibilizar relatorio anual de efetividade.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: A proposta inclui festas judaicas no calendario oficial?
+  chunk_ouro: cam:2419864:a1:02
+  doc_id: '2419864'
+  justificativa: Art. 1o inclui Rosh Hashana e Yom Kippur no calendario oficial de datas comemorativas.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: licenca maternidade 180 dias CLT art. 392
+  chunk_ouro: cam:2416598:a1:04
+  doc_id: '2416598'
+  justificativa: Art. 1o altera o art. 392 do Decreto-Lei 5.452/43 para prever licenca maternidade de 180 dias.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: O que e considerado peca publicitaria para fins da lei?
+  chunk_ouro: cam:2485089:a2:03
+  doc_id: '2485089'
+  justificativa: Art. 2o define peca publicitaria e meio de comunicacao para a lei de advertencia.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: Tesouro Nacional depositara recursos Banco do Brasil conta especial
+  chunk_ouro: cam:2415585:a2:03
+  doc_id: '2415585'
+  justificativa: Art. 2o altera o par. 2o do art. 16-C da Lei 9.504/97 sobre deposito do Tesouro no Banco do Brasil.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Qual data sera o Dia Nacional de Conscientizacao sobre a Sindrome de Edwards?
+  chunk_ouro: cam:2416758:a1:02
+  doc_id: '2416758'
+  justificativa: Art. 1o institui o Dia Nacional de Conscientizacao sobre a Sindrome de Edwards em 6 de maio.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: priorizar abastecimento alimentar Sisan Lei 11.346
+  chunk_ouro: cam:2469474:a1:02
+  doc_id: '2469474'
+  justificativa: Art. 1o altera o art. 4o da Lei 11.346/2006 para priorizar o abastecimento alimentar.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Qual o piso salarial nacional de medico veterinario e zootecnista?
+  chunk_ouro: cam:2414193:a1:04
+  doc_id: '2414193'
+  justificativa: Art. 1o institui o piso salarial nacional de Medico Veterinario e Zootecnista.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: transferencia ex officio servidor publico estadual estudante
+  chunk_ouro: cam:2414944:a1:02
+  doc_id: '2414944'
+  justificativa: Art. 1o altera a Lei 9.536/97 para estender a transferencia ex officio a servidor estudante.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: A proposta permite quitacao de multas administrativas com creditos tributarios?
+  chunk_ouro: cam:2625598:a1:02
+  doc_id: '2625598'
+  justificativa: Art. 1o altera a Lei 14.133/2021 e 11.079/2004 sobre concessao de creditos tributarios e quitacao de multas.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: placas veiculares informem Municipio e Estado CTB
+  chunk_ouro: cam:2443622:a1:02
+  doc_id: '2443622'
+  justificativa: Art. 1o altera o art. 115 do CTB para que as placas informem o Municipio e o Estado.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao
+- query: Sobre quais operacoes incide a nova contribuicao de intervencao?
+  chunk_ouro: cam:2413243:a1:02
+  doc_id: '2413243'
+  justificativa: Art. 1o institui a CIDE sobre operacoes com maquinas, softwares e servicos digitais.
+  retrieval_profile: dense_only
+  query_type: paraphrase
+  doc_type: proposicao
+- query: doenca rara recebera gratuitamente tratamento no SUS
+  chunk_ouro: cam:2415320:a1:02
+  doc_id: '2415320'
+  justificativa: Art. 1o garante tratamento gratuito no SUS ao paciente com doenca rara.
+  retrieval_profile: sparse_only
+  query_type: literal_term
+  doc_type: proposicao

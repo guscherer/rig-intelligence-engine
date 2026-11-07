@@ -159,7 +159,8 @@ O avaliador consegue clonar o repo e rodar `make ingest` **sem conta em provedor
 
 ## 8. Versionamento e reprodutibilidade
 
-- `data/manifest.json` — hash do corpus por documento, gerado na ingestão, commitado.
+- `data/manifest.fixtures.json` — hash do corpus por documento (fixtures), commitado.
+- `data/manifest.json` — manifesto do corpus real gerado por `make ingest` (gitignored).
 - `dataset_version` gravado em cada run: permite dizer "esta minuta foi gerada com o corpus de 2026-11-05".
 - Golden set versionado (`golden_set/v1.yaml`) com hash; mudar rótulo exige bump de versão e reavaliação completa.
 - Nenhum número de avaliação é comparável entre versões diferentes de corpus sem re-rodar a baseline.

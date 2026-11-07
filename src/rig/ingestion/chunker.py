@@ -195,7 +195,7 @@ def _container_at(text: str, pos: int) -> str | None:
     return last
 
 
-def _parse_article_segments(article: _Article) -> None:  # noqa: PLR0912, PLR0915  # parser hierárquico; complexidade inerente
+def _parse_article_segments(article: _Article) -> None:  # noqa: PLR0912, PLR0915, C901  # parser hierárquico; complexidade inerente
     text = article.text
     base_start = article.start
     art_label = article.art_label
@@ -284,7 +284,7 @@ def _parse_article_segments(article: _Article) -> None:  # noqa: PLR0912, PLR091
         )
 
 
-def _group_article_chunks(  # noqa: PLR0912, PLR0915  # quebra por orçamento de tokens
+def _group_article_chunks(  # noqa: PLR0912, PLR0915, C901  # quebra por orçamento de tokens
     article: _Article,
     quality: str,
     source: str,
@@ -612,7 +612,7 @@ def _build_articles(text: str) -> tuple[str, list[_Article], str]:
     return preamble, articles, trailing
 
 
-def chunk_document(text: str, doc_meta: dict[str, Any]) -> list[Chunk]:
+def chunk_document(text: str, doc_meta: dict[str, Any]) -> list[Chunk]:  # noqa: C901 - segmentacao hierarquica inerente; refatoracao planejada (follow-up)
     """Segmenta texto legislativo em chunks hierárquicos."""
     doc_meta = dict(doc_meta or {})
     doc_id = str(doc_meta.get("doc_id") or doc_meta.get("id") or doc_meta.get("docId") or "")

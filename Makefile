@@ -3,7 +3,7 @@
 PY := uv run
 SRC := src
 
-.PHONY: help install check lint format type arch test test-live size clean up down ingest-smoke
+.PHONY: help install check lint format type arch test test-live size clean up down ingest ingest-smoke ingest-full embed search eval-retrieval
 
 help:
 > @echo "install  - cria venv e instala deps (dev)"
@@ -17,7 +17,7 @@ help:
 > @echo "up/down  - docker compose postgres + redis"
 
 install:
-> uv sync --extra dev
+> uv sync --extra dev --extra embed
 
 check: lint format-check type arch test
 > @echo "OK - gate completo passou"
@@ -50,6 +50,20 @@ test-live:
 ingest-smoke:
 > $(PY) pytest -m integration tests/integration/test_ingest_e2e.py -q
 
+ingest:
+> $(PY) python scripts/ingest.py
+
+ingest-full: ingest
+
+embed:
+> $(PY) python scripts/embed.py
+
+search:
+> $(PY) python scripts/search.py $(filter-out $@,$(MAKECMDGOALS))
+
+eval-retrieval:
+> $(PY) python scripts/eval_retrieval.py
+
 up:
 > docker compose up -d
 > docker compose ps
@@ -59,3 +73,6 @@ down:
 
 clean:
 > rm -rf .pytest_cache .mypy_cache .ruff_cache .coverage htmlcov
+
+%:
+> @:

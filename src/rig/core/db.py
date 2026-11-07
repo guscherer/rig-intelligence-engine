@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg  # type: ignore[import-untyped]  # asyncpg nao publica stubs tipados
 
 
 def database_url() -> str:

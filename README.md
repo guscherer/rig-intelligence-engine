@@ -95,7 +95,7 @@ Decisões de arquitetura com o porquê: [`docs/09-decisions.md`](docs/09-decisio
 | Tempo de extração + chunking (2 docs) | 0,21 s |
 | Taxa de chunks com `kind` válido | 7/7 (100%) |
 
-Corpus: PL 3878/2024 (3 páginas, 4 chunks) e PL 2220/2024 (1 página, 3 chunks), ambos da Câmara dos Deputados, com atribuição. Hashes e metadados em [`data/manifest.json`](data/manifest.json). Texto integral não é versionado (ADR-009); obtido via `make ingest` (requer rede).
+Corpus: PL 3878/2024 (3 páginas, 4 chunks) e PL 2220/2024 (1 página, 3 chunks), ambos da Câmara dos Deputados, com atribuição. Hashes e metadados em [`data/manifest.fixtures.json`](data/manifest.fixtures.json). Texto integral não é versionado (ADR-009); obtido via `make ingest` (requer rede).
 
 ## Como rodar
 
