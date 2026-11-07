@@ -9,10 +9,12 @@ e grava relatorio em docs/eval-retrieval.md e eval/results/recall_v1.json.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 import random
 import statistics
+import subprocess
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -400,6 +402,23 @@ async def main() -> None:  # noqa: PLR0915
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     run_date = datetime.now(UTC).date().isoformat()
+
+    # Proveniencia (anti-fabricacao): vincula o JSON ao log e ao relatorio.
+    try:
+        git_head = subprocess.check_output(  # noqa: ASYNC221
+            ["git", "rev-parse", "HEAD"],  # noqa: S607
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        git_head = "unknown"
+    bench_log_path = ROOT / "bench.log"
+    if bench_log_path.is_file():
+        log_sha256 = hashlib.sha256(bench_log_path.read_bytes()).hexdigest()
+    else:
+        log_sha256 = None
+
     payload = {
         "run_date": run_date,
         "corpus_version": corpus_version,
@@ -427,11 +446,18 @@ async def main() -> None:  # noqa: PLR0915
         "encode_latency_p50_min_ms": round(encode_run_p50_min, 2),
         "encode_latency_p50_max_ms": round(encode_run_p50_max, 2),
         "model_load_ms": round(model_load_ms, 2),
+        "provenance": {
+            "generated_by": "scripts/eval_retrieval.py",
+            "git_head": git_head,
+            "command": os.environ.get(
+                "EVAL_RETRIEVAL_COMMAND", "uv run python scripts/eval_retrieval.py"
+            ),
+            "log_sha256": log_sha256,
+            "report_sha256": None,  # preenchido apos renderizacao do relatorio
+        },
         "variants": [{k: v for k, v in r.items() if k != "per_query"} for r in results],
         "per_query": {r["variant"]: r["per_query"] for r in results},
     }
-    JSON_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-
     report = render_report(
         results,
         run_date,
@@ -440,7 +466,13 @@ async def main() -> None:  # noqa: PLR0915
         encode_p95_ms=encode_p95_ms,
         model_load_ms=model_load_ms,
     )
-    REPORT_PATH.write_text(report, encoding="utf-8")
+    report_sha256 = hashlib.sha256(report.encode("utf-8")).hexdigest()
+    payload["provenance"]["report_sha256"] = report_sha256
+
+    with JSON_PATH.open("w", encoding="utf-8", newline=chr(10)) as f:
+        f.write(json.dumps(payload, ensure_ascii=False, indent=2))
+    with REPORT_PATH.open("w", encoding="utf-8", newline=chr(10)) as f:
+        f.write(report)
     print(f"Relatório: {REPORT_PATH}")
     print(f"JSON: {JSON_PATH}")
 
