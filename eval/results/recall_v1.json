@@ -24,7 +24,8 @@
       "latency_p50_ms": 75.61890200000133,
       "latency_p95_ms": 83.41211780000054,
       "latency_mean_ms": 88.86629424999998,
-      "hits": 38
+      "hits": 38,
+      "errors": 0
     },
     {
       "variant": "sparse",
@@ -42,7 +43,8 @@
       "latency_p50_ms": 1.2761420000000356,
       "latency_p95_ms": 1.667449649999941,
       "latency_mean_ms": 1.4840445500000854,
-      "hits": 15
+      "hits": 15,
+      "errors": 0
     },
     {
       "variant": "rrf",
@@ -60,7 +62,8 @@
       "latency_p50_ms": 73.92116250000136,
       "latency_p95_ms": 79.12055600000033,
       "latency_mean_ms": 74.10788120000018,
-      "hits": 37
+      "hits": 37,
+      "errors": 0
     },
     {
       "variant": "rrf+rerank",
@@ -80,7 +83,8 @@
       "latency_mean_ms": null,
       "hits": 0,
       "status": "not_measured",
-      "error": "inviavel neste host: OOM (~3.3 GB) + >10 min/consulta em CPU"
+      "error": "inviavel neste host: OOM (~3.3 GB) + >10 min/consulta em CPU",
+      "errors": 0
     }
   ],
   "per_query": {
@@ -1171,5 +1175,12 @@
       }
     ],
     "rrf+rerank": []
+  },
+  "latency_boundary": {
+    "measured": "retrieval after query encode (timer starts at eval_retrieval.py:79 with query_vector ready)",
+    "encode_p50_ms": 1428.13,
+    "encode_p95_ms": 2026.74,
+    "encode_n": 40,
+    "prior_full_path_dense_p95_ms": 2082
   }
 }

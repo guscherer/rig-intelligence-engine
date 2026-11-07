@@ -54,7 +54,7 @@ def _percentile(values: list[float], p: float) -> float:
     return ordered[lo] * (1 - frac) + ordered[hi] * frac
 
 
-async def _run_variant(  # noqa: PLR0915
+async def _run_variant(  # noqa: PLR0915 - benchmark orquestra variantes, metricas, CI e relatorio por consulta
     pool,
     encoder,
     reranker,
@@ -70,6 +70,7 @@ async def _run_variant(  # noqa: PLR0915
     per_query: list[dict] = []
 
     infeasible = False
+    errors = 0
     for idx, item in enumerate(items):
         query = item["query"]
         gold = item["chunk_ouro"]
@@ -96,6 +97,7 @@ async def _run_variant(  # noqa: PLR0915
         except Exception as exc:
             results = []
             err = f"{type(exc).__name__}: {exc}"
+            errors += 1
             if bail:
                 infeasible = True
         else:
@@ -147,7 +149,7 @@ async def _run_variant(  # noqa: PLR0915
     mrr = sum(rrs) / n if n else 0.0
 
     # Bootstrap CI (resample queries).
-    rng = random.Random(SEED)  # noqa: S311
+    rng = random.Random(SEED)  # noqa: S311 - bootstrap CI, nao criptografia
     recall_samples: list[float] = []
     mrr_samples: list[float] = []
     for _ in range(BOOTSTRAP_B):
@@ -168,18 +170,19 @@ async def _run_variant(  # noqa: PLR0915
         "latency_p95_ms": _percentile(latencies_ms, 95),
         "latency_mean_ms": statistics.fmean(latencies_ms) if latencies_ms else 0.0,
         "hits": sum(hits),
+        "errors": errors,
         "per_query": per_query,
     }
 
 
-async def main() -> None:  # noqa: PLR0915
+async def main() -> None:  # noqa: PLR0915 - orquestra carga do golden set, variantes, escrita de JSON e Markdown
     with GOLDEN_PATH.open(encoding="utf-8") as f:
         golden = yaml.safe_load(f)
     items = golden["items"]
     corpus_version = golden.get("dataset_version", "unknown")
 
     # Lazy import torch-heavy stack once.
-    from rig.retrieval.embed import load_encoder  # noqa: PLC0415
+    from rig.retrieval.embed import load_encoder  # noqa: PLC0415 - lazy import do stack torch para manter gate verde sem extra embed
 
     encoder = load_encoder()
 
@@ -199,6 +202,11 @@ async def main() -> None:  # noqa: PLR0915
                 bail=False,
             )
             results.append(res)
+            if res.get("errors", 0) > 0:
+                raise RuntimeError(
+                    f"variante {variant} teve {res['errors']} erro(s) de infra; "
+                    "abortando rodada sem publicar recall contaminado"
+                )
             print(
                 f"  recall@8={res['recall_at_8']:.3f} "
                 f"MRR@8={res['mrr_at_8']:.3f} "
@@ -217,6 +225,7 @@ async def main() -> None:  # noqa: PLR0915
                 "latency_p95_ms": None,
                 "latency_mean_ms": None,
                 "hits": 0,
+                "errors": 0,
                 "status": "not_measured",
                 "error": "inviavel neste host: OOM (~3.3 GB) + >10 min/consulta em CPU",
                 "per_query": [],
@@ -287,11 +296,16 @@ async def main() -> None:  # noqa: PLR0915
     )
     lines.append("")
     lines.append(
-        "Decisão: o híbrido (RRF) não supera o denso puro de forma estatisticamente "
-        "relevante (dense recall@8=0.950, IC95 [0.875, 1.000] vs. rrf 0.925, "
-        "IC95 [0.825, 1.000] — intervalos sobrepostos, n=40). O rerank (cross-encoder) "
-        "é inviável neste host: tentou alocar ~3,3 GB (OOM) e, mesmo com liberação do "
-        "encoder, cada consulta leva >10 min em CPU — não paga o custo de latência. "
+        "Decisão: empate estatístico em n=40 (dense recall@8=0.950, IC95 "
+        "[0.875, 1.000] vs. rrf 0.925, IC95 [0.825, 1.000] — diferença de "
+        "uma consulta, intervalos sobrepostos). O híbrido (RRF) não supera o "
+        "denso de forma estatisticamente relevante, e a afirmação recíproca "
+        "também seria verdadeira. Mantém-se `dense` como default pela "
+        "justificativa operacional: o encode da consulta já está no caminho, "
+        "eliminar BM25+RRF reduz superfície de manutenção e latência de "
+        "operação. O rerank (cross-encoder) é inviável neste host: tentou "
+        "alocar ~3,3 GB (OOM) e, mesmo com liberação do encoder, cada "
+        "consulta leva >10 min em CPU — não paga o custo de latência. "
         "Default alterado para `dense` (rerank desligado por padrão)."
     )
     lines.append("")

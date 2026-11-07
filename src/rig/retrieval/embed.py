@@ -117,7 +117,7 @@ def load_encoder(model: str | None = None) -> Any:
     """Carrega o encoder real (lazy import de sentence-transformers)."""
     name = model or model_name()
     try:
-        module = importlib.import_module("sentence_transformers")
+        module = importlib.import_module("sentence_transformers")  # lazy: gate verde sem embed
         sentence_transformer_cls = module.SentenceTransformer
     except ImportError as exc:
         raise RuntimeError(
@@ -268,7 +268,7 @@ async def _process_batch(
         await _process_one(stats, encoder, chunk_id, text, pool, write, batch_size)
 
 
-async def backfill_embeddings(  # noqa: PLR0913
+async def backfill_embeddings(  # noqa: PLR0913 - backfill aceita overrides opcionais (pool, encoder, batch, limit, rows, fetch, write) para testabilidade
     pool: Any = None,
     *,
     encoder: Any = None,

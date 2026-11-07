@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import os
 from dataclasses import dataclass, field
@@ -147,7 +148,7 @@ async def dense_search(
          WHERE embedding IS NOT NULL{filter_sql}
          ORDER BY embedding <=> $1::vector
          LIMIT ${limit_idx}
-    """  # noqa: S608
+    """  # noqa: S608 - filter_sql/limit_idx sao indices de placeholder gerados; valores sao bindados via params (sem interpolacao de dado)
     async with pool.acquire() as conn:
         rows = await conn.fetch(sql, *params)
     return [_row_to_result(r) for r in rows]
@@ -174,7 +175,7 @@ async def sparse_search(
          WHERE tsv @@ plainto_tsquery('pt_unaccent', immutable_unaccent($1)){filter_sql}
          ORDER BY score DESC
          LIMIT ${limit_idx}
-    """  # noqa: S608
+    """  # noqa: S608 - filter_sql/limit_idx sao indices de placeholder gerados; valores sao bindados via params (sem interpolacao de dado)
     async with pool.acquire() as conn:
         rows = await conn.fetch(sql, *params)
     return [_row_to_result(r) for r in rows]
@@ -212,7 +213,7 @@ def load_reranker(model: str | None = None) -> Any:
     """Carrega cross-encoder local (lazy). Levanta RuntimeError se indisponível."""
     name = model or os.environ.get("MODEL_RERANKER", "BAAI/bge-reranker-v2-m3")
     try:
-        module = __import__("sentence_transformers", fromlist=["CrossEncoder"])
+        module = importlib.import_module("sentence_transformers")  # lazy: gate verde sem embed
         cross_encoder_cls = module.CrossEncoder
     except ImportError as exc:
         raise RuntimeError("stack de rerank nao instalada; rode `uv sync --extra embed`") from exc
@@ -245,7 +246,7 @@ def rerank_results(
     return ordered
 
 
-async def search(  # noqa: PLR0913
+async def search(  # noqa: PLR0913 - pipeline de busca aceita parametros opcionais (mode, filters, limit, candidate_k, encoder, query_vector, reranker, rerank)
     pool: Any,
     query: str,
     *,
