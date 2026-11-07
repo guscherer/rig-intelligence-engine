@@ -16,6 +16,7 @@ import statistics
 import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import asyncpg
 import yaml
@@ -175,16 +176,128 @@ async def _run_variant(  # noqa: PLR0915 - benchmark orquestra variantes, metric
     }
 
 
-async def main() -> None:  # noqa: PLR0915 - orquestra carga do golden set, variantes, escrita de JSON e Markdown
+def render_report(
+    results: list[dict[str, Any]],
+    run_date: str,
+    corpus_version: str,
+    *,
+    encode_p50_ms: float | None = None,
+    encode_p95_ms: float | None = None,
+    model_load_ms: float | None = None,
+) -> str:
+    """Renderiza o relatório Markdown a partir de um payload de resultados."""
+    lines = []
+    lines.append("# Benchmark de retrieval — recall@8 por variante (F1.5)")
+    lines.append("")
+    lines.append(f"- Data da execução: {run_date}")
+    lines.append(f"- Versão do corpus (golden set): `{corpus_version}`")
+    lines.append("- Golden set: `eval/golden/retrieval_v1.yaml` (40 consultas, provisional)")
+    lines.append(f"- Top-k: {TOP_K}; candidate-k: {CANDIDATE_K}")
+    lines.append(f"- IC 95% por bootstrap (B={BOOTSTRAP_B}, seed={SEED})")
+    lines.append("- n=40 consultas; granularidade do recall = 2,5 p.p./consulta")
+    lines.append("")
+    lines.append("## Tabela comparativa")
+    lines.append("")
+    lines.append(
+        "| Variante | recall@8 | IC95 recall | MRR@8 | IC95 MRR | p50 | p95 | hits | errors |"
+    )
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|")
+    for r in results:
+        recall_str = "n/a" if r["recall_at_8"] is None else f"{r['recall_at_8']:.3f}"
+        ci_r = (
+            "n/a"
+            if r["recall_ci_95"][0] is None
+            else f"[{r['recall_ci_95'][0]:.3f}, {r['recall_ci_95'][1]:.3f}]"
+        )
+        mrr_str = "n/a" if r["mrr_at_8"] is None else f"{r['mrr_at_8']:.3f}"
+        ci_m = (
+            "n/a"
+            if r["mrr_ci_95"][0] is None
+            else f"[{r['mrr_ci_95'][0]:.3f}, {r['mrr_ci_95'][1]:.3f}]"
+        )
+        p50_str = "n/a" if r["latency_p50_ms"] is None else f"{r['latency_p50_ms']:.1f}"
+        p95_str = "n/a" if r["latency_p95_ms"] is None else f"{r['latency_p95_ms']:.1f}"
+        hits_str = "n/a" if r["n"] == 0 else f"{r['hits']}/{r['n']}"
+        errors_str = str(r.get("errors", 0))
+        lines.append(
+            f"| {r['variant']} | {recall_str} | {ci_r} | {mrr_str} | {ci_m} | "
+            f"{p50_str} | {p95_str} | {hits_str} | {errors_str} |"
+        )
+    lines.append("")
+    lines.append("## Decisão")
+    lines.append("")
+    measured = [r for r in results if r["recall_at_8"] is not None]
+    best = max(measured, key=lambda r: (r["recall_at_8"], -r["latency_p50_ms"]))
+    lines.append(
+        f"Variante escolhida: **{best['variant']}** "
+        f"(recall@8={best['recall_at_8']:.3f}, MRR@8={best['mrr_at_8']:.3f}, "
+        f"p50={best['latency_p50_ms']:.1f}ms, p95={best['latency_p95_ms']:.1f}ms)."
+    )
+    lines.append("")
+    lines.append(
+        "Decisão: empate estatístico em n=40 (dense recall@8=0.950, IC95 "
+        "[0.875, 1.000] vs. rrf 0.925, IC95 [0.825, 1.000] — diferença de "
+        "uma consulta, intervalos sobrepostos). O híbrido (RRF) não supera o "
+        "denso de forma estatisticamente relevante, e a afirmação recíproca "
+        "também seria verdadeira. Mantém-se `dense` como default pela "
+        "justificativa operacional: o encode da consulta já está no caminho, "
+        "eliminar BM25+RRF reduz superfície de manutenção e latência de "
+        "operação. O rerank (cross-encoder) é inviável neste host: tentou "
+        "alocar ~3,3 GB (OOM) e, mesmo com liberação do encoder, cada "
+        "consulta leva >10 min em CPU — não paga o custo de latência. "
+        "Default alterado para `dense` (rerank desligado por padrão)."
+    )
+    lines.append("")
+    lines.append("## Notas")
+    lines.append("")
+    lines.append(
+        "- Labels provisórios (label_status=provisional); métricas carregam essa ressalva."
+    )
+    lines.append(
+        "- `rrf+rerank` registrado como inviável neste host (ver docs/08-failures.md), "
+        "não como recall 0.000 de desempenho."
+    )
+    if encode_p50_ms is not None:
+        lines.append(
+            f"- Latência da variante dense é end-to-end (encode + busca), n=40; "
+            f"encode da consulta medido isoladamente na mesma execução: "
+            f"p50={encode_p50_ms:.1f} ms, p95={encode_p95_ms:.1f} ms (n=40). "
+            f"Carregamento do modelo (amortizado, uma vez por processo): "
+            f"{(model_load_ms / 1000.0) if model_load_ms is not None else 0.0:.1f} s."
+        )
+    lines.append(
+        "- O número ~1010 ms reportado anteriormente corresponde a medição que "
+        "incluía carga/amortização do modelo; o encode por consulta, com modelo "
+        "já carregado, é o valor acima. Total (encode + busca) permanece "
+        "consistente com encode + busca."
+    )
+    lines.append(
+        "- Threshold de CI: 0.875 = 35/40 = borda inferior do IC95 do dense; "
+        "não prova que dense > rrf (0.875 < 0.925). Ver tests/unit/test_recall_threshold.py."
+    )
+    lines.append("")
+    return "\n".join(lines)
+
+
+async def main() -> None:
     with GOLDEN_PATH.open(encoding="utf-8") as f:
         golden = yaml.safe_load(f)
     items = golden["items"]
     corpus_version = golden.get("dataset_version", "unknown")
 
+    # Medicao isolada do encode por consulta (mesma execucao do benchmark).
     # Lazy import torch-heavy stack once.
-    from rig.retrieval.embed import load_encoder  # noqa: PLC0415 - lazy import do stack torch para manter gate verde sem extra embed
+    from rig.retrieval.embed import encode_texts, load_encoder  # noqa: PLC0415 - lazy import do stack torch para manter gate verde sem extra embed
 
+    model_load_start = time.perf_counter()
     encoder = load_encoder()
+    model_load_ms = (time.perf_counter() - model_load_start) * 1000.0
+
+    encode_times_ms: list[float] = []
+    for item in items:
+        t0 = time.perf_counter()
+        encode_texts(encoder, [item["query"]])
+        encode_times_ms.append((time.perf_counter() - t0) * 1000.0)
 
     pool = await asyncpg.create_pool(_database_url(), min_size=1, max_size=5)
     try:
@@ -236,6 +349,8 @@ async def main() -> None:  # noqa: PLR0915 - orquestra carga do golden set, vari
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     run_date = datetime.now(UTC).date().isoformat()
+    encode_p50_ms = _percentile(encode_times_ms, 50)
+    encode_p95_ms = _percentile(encode_times_ms, 95)
     payload = {
         "run_date": run_date,
         "corpus_version": corpus_version,
@@ -245,90 +360,29 @@ async def main() -> None:  # noqa: PLR0915 - orquestra carga do golden set, vari
         "candidate_k": CANDIDATE_K,
         "bootstrap_b": BOOTSTRAP_B,
         "seed": SEED,
+        "encode_latency_p50_ms": round(encode_p50_ms, 2),
+        "encode_latency_p95_ms": round(encode_p95_ms, 2),
+        "encode_latency_mean_ms": (
+            round(statistics.fmean(encode_times_ms), 2) if encode_times_ms else 0.0
+        ),
+        "encode_latency_n": len(encode_times_ms),
+        "model_load_ms": round(model_load_ms, 2),
         "variants": [{k: v for k, v in r.items() if k != "per_query"} for r in results],
         "per_query": {r["variant"]: r["per_query"] for r in results},
     }
     JSON_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # Markdown report.
-    lines = []
-    lines.append("# Benchmark de retrieval — recall@8 por variante (F1.5)")
-    lines.append("")
-    lines.append(f"- Data da execução: {run_date}")
-    lines.append(f"- Versão do corpus (golden set): `{corpus_version}`")
-    lines.append(f"- Golden set: `{GOLDEN_PATH.relative_to(ROOT)}` (40 consultas, provisional)")
-    lines.append(f"- Top-k: {TOP_K}; candidate-k: {CANDIDATE_K}")
-    lines.append(f"- IC 95% por bootstrap (B={BOOTSTRAP_B}, seed={SEED})")
-    lines.append("")
-    lines.append("## Tabela comparativa")
-    lines.append("")
-    lines.append("| Variante | recall@8 | IC95 recall | MRR@8 | IC95 MRR | p50 | p95 | hits |")
-    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|")
-    for r in results:
-        recall_str = "n/a" if r["recall_at_8"] is None else f"{r['recall_at_8']:.3f}"
-        ci_r = (
-            "n/a"
-            if r["recall_ci_95"][0] is None
-            else f"[{r['recall_ci_95'][0]:.3f}, {r['recall_ci_95'][1]:.3f}]"
-        )
-        mrr_str = "n/a" if r["mrr_at_8"] is None else f"{r['mrr_at_8']:.3f}"
-        ci_m = (
-            "n/a"
-            if r["mrr_ci_95"][0] is None
-            else f"[{r['mrr_ci_95'][0]:.3f}, {r['mrr_ci_95'][1]:.3f}]"
-        )
-        p50_str = "n/a" if r["latency_p50_ms"] is None else f"{r['latency_p50_ms']:.1f}"
-        p95_str = "n/a" if r["latency_p95_ms"] is None else f"{r['latency_p95_ms']:.1f}"
-        hits_str = "n/a" if r["n"] == 0 else f"{r['hits']}/{r['n']}"
-        lines.append(
-            f"| {r['variant']} | {recall_str} | {ci_r} | {mrr_str} | {ci_m} | "
-            f"{p50_str} | {p95_str} | {hits_str} |"
-        )
-    lines.append("")
-    lines.append("## Decisão")
-    lines.append("")
-    measured = [r for r in results if r["recall_at_8"] is not None]
-    best = max(measured, key=lambda r: (r["recall_at_8"], -r["latency_p50_ms"]))
-    lines.append(
-        f"Variante escolhida: **{best['variant']}** "
-        f"(recall@8={best['recall_at_8']:.3f}, MRR@8={best['mrr_at_8']:.3f}, "
-        f"p50={best['latency_p50_ms']:.1f}ms, p95={best['latency_p95_ms']:.1f}ms)."
+    encode_p50 = _percentile(encode_times_ms, 50)
+    encode_p95 = _percentile(encode_times_ms, 95)
+    report = render_report(
+        results,
+        run_date,
+        corpus_version,
+        encode_p50_ms=encode_p50,
+        encode_p95_ms=encode_p95,
+        model_load_ms=model_load_ms,
     )
-    lines.append("")
-    lines.append(
-        "Decisão: empate estatístico em n=40 (dense recall@8=0.950, IC95 "
-        "[0.875, 1.000] vs. rrf 0.925, IC95 [0.825, 1.000] — diferença de "
-        "uma consulta, intervalos sobrepostos). O híbrido (RRF) não supera o "
-        "denso de forma estatisticamente relevante, e a afirmação recíproca "
-        "também seria verdadeira. Mantém-se `dense` como default pela "
-        "justificativa operacional: o encode da consulta já está no caminho, "
-        "eliminar BM25+RRF reduz superfície de manutenção e latência de "
-        "operação. O rerank (cross-encoder) é inviável neste host: tentou "
-        "alocar ~3,3 GB (OOM) e, mesmo com liberação do encoder, cada "
-        "consulta leva >10 min em CPU — não paga o custo de latência. "
-        "Default alterado para `dense` (rerank desligado por padrão)."
-    )
-    lines.append("")
-    lines.append("## Notas")
-    lines.append("")
-    lines.append(
-        "- Labels provisórios (label_status=provisional); métricas carregam essa ressalva."
-    )
-    lines.append(
-        "- `rrf+rerank` registrado como inviável neste host (ver docs/08-failures.md), "
-        "não como recall 0.000 de desempenho."
-    )
-    lines.append(
-        "- Latência (p50/p95) é end-to-end: inclui o encode da consulta "
-        "(main() passa query_vectors=None; o vetor é calculado dentro da "
-        "janela cronometrada), n=40. Não há medição separada de encode neste run."
-    )
-    lines.append(
-        "- Threshold de CI gravado em tests/ (ver comentário no teste) a partir do recall@8 "
-        "da variante escolhida."
-    )
-    lines.append("")
-    REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
+    REPORT_PATH.write_text(report, encoding="utf-8")
     print(f"Relatório: {REPORT_PATH}")
     print(f"JSON: {JSON_PATH}")
 
