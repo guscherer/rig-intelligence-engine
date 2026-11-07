@@ -319,6 +319,11 @@ async def main() -> None:  # noqa: PLR0915 - orquestra carga do golden set, vari
         "não como recall 0.000 de desempenho."
     )
     lines.append(
+        "- Latência (p50/p95) é end-to-end: inclui o encode da consulta "
+        "(main() passa query_vectors=None; o vetor é calculado dentro da "
+        "janela cronometrada), n=40. Não há medição separada de encode neste run."
+    )
+    lines.append(
         "- Threshold de CI gravado em tests/ (ver comentário no teste) a partir do recall@8 "
         "da variante escolhida."
     )

@@ -12,7 +12,7 @@
       "variant": "dense",
       "n": 40,
       "recall_at_8": 0.95,
-      "mrr_at_8": 0.6727083333333334,
+      "mrr_at_8": 0.6727083333333332,
       "recall_ci_95": [
         0.875,
         1.0
@@ -21,9 +21,9 @@
         0.5639322916666667,
         0.7781458333333332
       ],
-      "latency_p50_ms": 75.61890200000133,
-      "latency_p95_ms": 83.41211780000054,
-      "latency_mean_ms": 88.86629424999998,
+      "latency_p50_ms": 78.22366749999787,
+      "latency_p95_ms": 85.33754824999278,
+      "latency_mean_ms": 90.87021424999904,
       "hits": 38,
       "errors": 0
     },
@@ -31,7 +31,7 @@
       "variant": "sparse",
       "n": 40,
       "recall_at_8": 0.375,
-      "mrr_at_8": 0.30208333333333337,
+      "mrr_at_8": 0.3020833333333333,
       "recall_ci_95": [
         0.225,
         0.525
@@ -40,9 +40,9 @@
         0.18125,
         0.43755208333333306
       ],
-      "latency_p50_ms": 1.2761420000000356,
-      "latency_p95_ms": 1.667449649999941,
-      "latency_mean_ms": 1.4840445500000854,
+      "latency_p50_ms": 1.1866129999873465,
+      "latency_p95_ms": 1.7989277000026502,
+      "latency_mean_ms": 1.4721701249982289,
       "hits": 15,
       "errors": 0
     },
@@ -50,18 +50,18 @@
       "variant": "rrf",
       "n": 40,
       "recall_at_8": 0.925,
-      "mrr_at_8": 0.6870833333333334,
+      "mrr_at_8": 0.6870833333333333,
       "recall_ci_95": [
         0.825,
         1.0
       ],
       "mrr_ci_95": [
-        0.5741562499999999,
-        0.7979375
+        0.57415625,
+        0.7979374999999999
       ],
-      "latency_p50_ms": 73.92116250000136,
-      "latency_p95_ms": 79.12055600000033,
-      "latency_mean_ms": 74.10788120000018,
+      "latency_p50_ms": 73.84119400001055,
+      "latency_p95_ms": 79.05208080000534,
+      "latency_mean_ms": 73.5226792000006,
       "hits": 37,
       "errors": 0
     },
@@ -82,9 +82,9 @@
       "latency_p95_ms": null,
       "latency_mean_ms": null,
       "hits": 0,
+      "errors": 0,
       "status": "not_measured",
-      "error": "inviavel neste host: OOM (~3.3 GB) + >10 min/consulta em CPU",
-      "errors": 0
+      "error": "inviavel neste host: OOM (~3.3 GB) + >10 min/consulta em CPU"
     }
   ],
   "per_query": {
@@ -95,7 +95,7 @@
         "variant": "dense",
         "hit": false,
         "rank": null,
-        "latency_ms": 590.76,
+        "latency_ms": 607.58,
         "error": null
       },
       {
@@ -104,7 +104,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.65,
+        "latency_ms": 79.2,
         "error": null
       },
       {
@@ -113,7 +113,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 83.3,
+        "latency_ms": 87.54,
         "error": null
       },
       {
@@ -122,7 +122,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 4,
-        "latency_ms": 71.89,
+        "latency_ms": 78.98,
         "error": null
       },
       {
@@ -131,7 +131,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 81.01,
+        "latency_ms": 75.86,
         "error": null
       },
       {
@@ -140,7 +140,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 77.94,
+        "latency_ms": 79.53,
         "error": null
       },
       {
@@ -149,7 +149,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 85.58,
+        "latency_ms": 85.22,
         "error": null
       },
       {
@@ -158,7 +158,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 82.7,
+        "latency_ms": 76.72,
         "error": null
       },
       {
@@ -167,7 +167,7 @@
         "variant": "dense",
         "hit": false,
         "rank": null,
-        "latency_ms": 75.32,
+        "latency_ms": 77.02,
         "error": null
       },
       {
@@ -176,7 +176,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 75.65,
+        "latency_ms": 69.88,
         "error": null
       },
       {
@@ -185,7 +185,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 5,
-        "latency_ms": 78.25,
+        "latency_ms": 82.81,
         "error": null
       },
       {
@@ -194,7 +194,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 74.74,
+        "latency_ms": 69.29,
         "error": null
       },
       {
@@ -203,7 +203,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.89,
+        "latency_ms": 70.66,
         "error": null
       },
       {
@@ -212,7 +212,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 70.83,
+        "latency_ms": 72.06,
         "error": null
       },
       {
@@ -221,7 +221,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 8,
-        "latency_ms": 77.0,
+        "latency_ms": 79.14,
         "error": null
       },
       {
@@ -230,7 +230,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 75.51,
+        "latency_ms": 72.76,
         "error": null
       },
       {
@@ -239,7 +239,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 77.66,
+        "latency_ms": 82.32,
         "error": null
       },
       {
@@ -248,7 +248,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 4,
-        "latency_ms": 78.27,
+        "latency_ms": 80.42,
         "error": null
       },
       {
@@ -257,7 +257,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 6,
-        "latency_ms": 75.55,
+        "latency_ms": 81.1,
         "error": null
       },
       {
@@ -266,7 +266,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 76.6,
+        "latency_ms": 75.12,
         "error": null
       },
       {
@@ -275,7 +275,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 4,
-        "latency_ms": 79.33,
+        "latency_ms": 78.02,
         "error": null
       },
       {
@@ -284,7 +284,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 76.5,
+        "latency_ms": 80.34,
         "error": null
       },
       {
@@ -293,7 +293,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 78.21,
+        "latency_ms": 76.38,
         "error": null
       },
       {
@@ -302,7 +302,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 71.84,
+        "latency_ms": 72.09,
         "error": null
       },
       {
@@ -311,7 +311,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 75.59,
+        "latency_ms": 79.68,
         "error": null
       },
       {
@@ -320,7 +320,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 74.28,
+        "latency_ms": 79.76,
         "error": null
       },
       {
@@ -329,7 +329,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 77.1,
+        "latency_ms": 77.2,
         "error": null
       },
       {
@@ -338,7 +338,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 75.04,
+        "latency_ms": 75.11,
         "error": null
       },
       {
@@ -347,7 +347,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 71.69,
+        "latency_ms": 79.78,
         "error": null
       },
       {
@@ -356,7 +356,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 3,
-        "latency_ms": 74.08,
+        "latency_ms": 78.43,
         "error": null
       },
       {
@@ -365,7 +365,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.0,
+        "latency_ms": 75.48,
         "error": null
       },
       {
@@ -374,7 +374,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 75.95,
+        "latency_ms": 76.51,
         "error": null
       },
       {
@@ -383,7 +383,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 80.37,
+        "latency_ms": 83.61,
         "error": null
       },
       {
@@ -392,7 +392,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 76.74,
+        "latency_ms": 76.89,
         "error": null
       },
       {
@@ -401,7 +401,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 71.16,
+        "latency_ms": 73.77,
         "error": null
       },
       {
@@ -410,7 +410,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 3,
-        "latency_ms": 72.03,
+        "latency_ms": 70.93,
         "error": null
       },
       {
@@ -419,7 +419,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 79.71,
+        "latency_ms": 82.33,
         "error": null
       },
       {
@@ -428,7 +428,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 2,
-        "latency_ms": 75.46,
+        "latency_ms": 79.4,
         "error": null
       },
       {
@@ -437,7 +437,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 71.98,
+        "latency_ms": 79.45,
         "error": null
       },
       {
@@ -446,7 +446,7 @@
         "variant": "dense",
         "hit": true,
         "rank": 1,
-        "latency_ms": 71.51,
+        "latency_ms": 76.44,
         "error": null
       }
     ],
@@ -457,7 +457,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 12.14,
+        "latency_ms": 12.44,
         "error": null
       },
       {
@@ -466,7 +466,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.59,
+        "latency_ms": 1.79,
         "error": null
       },
       {
@@ -475,7 +475,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.5,
+        "latency_ms": 1.6,
         "error": null
       },
       {
@@ -484,7 +484,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.66,
+        "latency_ms": 1.9,
         "error": null
       },
       {
@@ -493,7 +493,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.62,
+        "latency_ms": 1.63,
         "error": null
       },
       {
@@ -502,7 +502,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 1.51,
+        "latency_ms": 1.41,
         "error": null
       },
       {
@@ -511,7 +511,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.76,
+        "latency_ms": 1.17,
         "error": null
       },
       {
@@ -520,7 +520,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 1.33,
+        "latency_ms": 1.11,
         "error": null
       },
       {
@@ -529,7 +529,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.46,
+        "latency_ms": 1.34,
         "error": null
       },
       {
@@ -538,7 +538,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 1.24,
+        "latency_ms": 1.3,
         "error": null
       },
       {
@@ -547,7 +547,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.38,
+        "latency_ms": 1.31,
         "error": null
       },
       {
@@ -556,7 +556,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.28,
+        "latency_ms": 1.3,
         "error": null
       },
       {
@@ -565,7 +565,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.6,
+        "latency_ms": 1.37,
         "error": null
       },
       {
@@ -574,7 +574,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.94,
+        "latency_ms": 0.93,
         "error": null
       },
       {
@@ -583,7 +583,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.66,
+        "latency_ms": 1.71,
         "error": null
       },
       {
@@ -592,7 +592,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 1.33,
+        "latency_ms": 1.18,
         "error": null
       },
       {
@@ -601,7 +601,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.44,
+        "latency_ms": 1.14,
         "error": null
       },
       {
@@ -610,7 +610,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.61,
+        "latency_ms": 1.4,
         "error": null
       },
       {
@@ -619,7 +619,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.65,
+        "latency_ms": 1.43,
         "error": null
       },
       {
@@ -628,7 +628,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 3,
-        "latency_ms": 1.27,
+        "latency_ms": 1.14,
         "error": null
       },
       {
@@ -637,7 +637,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 4,
-        "latency_ms": 1.23,
+        "latency_ms": 1.25,
         "error": null
       },
       {
@@ -646,7 +646,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 0.77,
+        "latency_ms": 0.74,
         "error": null
       },
       {
@@ -655,7 +655,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.42,
+        "latency_ms": 1.5,
         "error": null
       },
       {
@@ -664,7 +664,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.83,
+        "latency_ms": 0.93,
         "error": null
       },
       {
@@ -673,7 +673,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.38,
+        "latency_ms": 1.19,
         "error": null
       },
       {
@@ -682,7 +682,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 1.03,
+        "latency_ms": 1.08,
         "error": null
       },
       {
@@ -691,7 +691,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.88,
+        "latency_ms": 0.94,
         "error": null
       },
       {
@@ -700,7 +700,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 0.95,
+        "latency_ms": 0.94,
         "error": null
       },
       {
@@ -709,7 +709,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.78,
+        "latency_ms": 0.69,
         "error": null
       },
       {
@@ -718,7 +718,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.43,
+        "latency_ms": 1.54,
         "error": null
       },
       {
@@ -727,7 +727,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.68,
+        "latency_ms": 0.71,
         "error": null
       },
       {
@@ -736,7 +736,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 1.15,
+        "latency_ms": 1.19,
         "error": null
       },
       {
@@ -745,7 +745,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 0.76,
+        "latency_ms": 0.85,
         "error": null
       },
       {
@@ -754,7 +754,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 2,
-        "latency_ms": 1.09,
+        "latency_ms": 1.25,
         "error": null
       },
       {
@@ -763,7 +763,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 2,
-        "latency_ms": 0.91,
+        "latency_ms": 0.89,
         "error": null
       },
       {
@@ -772,7 +772,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 2,
-        "latency_ms": 0.97,
+        "latency_ms": 1.2,
         "error": null
       },
       {
@@ -781,7 +781,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.68,
+        "latency_ms": 0.78,
         "error": null
       },
       {
@@ -790,7 +790,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 0.64,
+        "latency_ms": 0.66,
         "error": null
       },
       {
@@ -799,7 +799,7 @@
         "variant": "sparse",
         "hit": false,
         "rank": null,
-        "latency_ms": 1.05,
+        "latency_ms": 1.1,
         "error": null
       },
       {
@@ -808,7 +808,7 @@
         "variant": "sparse",
         "hit": true,
         "rank": 1,
-        "latency_ms": 0.76,
+        "latency_ms": 0.85,
         "error": null
       }
     ],
@@ -819,7 +819,7 @@
         "variant": "rrf",
         "hit": false,
         "rank": null,
-        "latency_ms": 75.9,
+        "latency_ms": 78.4,
         "error": null
       },
       {
@@ -828,7 +828,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 71.09,
+        "latency_ms": 70.86,
         "error": null
       },
       {
@@ -837,7 +837,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 76.22,
+        "latency_ms": 76.8,
         "error": null
       },
       {
@@ -846,7 +846,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 4,
-        "latency_ms": 72.99,
+        "latency_ms": 75.41,
         "error": null
       },
       {
@@ -855,7 +855,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 73.16,
+        "latency_ms": 77.76,
         "error": null
       },
       {
@@ -864,7 +864,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 74.16,
+        "latency_ms": 75.75,
         "error": null
       },
       {
@@ -873,7 +873,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 76.45,
+        "latency_ms": 73.61,
         "error": null
       },
       {
@@ -882,7 +882,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 73.99,
+        "latency_ms": 74.24,
         "error": null
       },
       {
@@ -891,7 +891,7 @@
         "variant": "rrf",
         "hit": false,
         "rank": null,
-        "latency_ms": 70.7,
+        "latency_ms": 77.63,
         "error": null
       },
       {
@@ -900,7 +900,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 66.34,
+        "latency_ms": 70.1,
         "error": null
       },
       {
@@ -909,7 +909,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 5,
-        "latency_ms": 79.05,
+        "latency_ms": 81.46,
         "error": null
       },
       {
@@ -918,7 +918,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 73.29,
+        "latency_ms": 74.65,
         "error": null
       },
       {
@@ -927,7 +927,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 74.43,
+        "latency_ms": 74.61,
         "error": null
       },
       {
@@ -936,7 +936,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 70.43,
+        "latency_ms": 72.34,
         "error": null
       },
       {
@@ -945,7 +945,7 @@
         "variant": "rrf",
         "hit": false,
         "rank": null,
-        "latency_ms": 75.24,
+        "latency_ms": 80.32,
         "error": null
       },
       {
@@ -954,7 +954,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 73.37,
+        "latency_ms": 71.7,
         "error": null
       },
       {
@@ -963,7 +963,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 80.42,
+        "latency_ms": 74.63,
         "error": null
       },
       {
@@ -972,7 +972,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 4,
-        "latency_ms": 77.01,
+        "latency_ms": 73.75,
         "error": null
       },
       {
@@ -981,7 +981,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 6,
-        "latency_ms": 73.62,
+        "latency_ms": 69.63,
         "error": null
       },
       {
@@ -990,7 +990,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 77.88,
+        "latency_ms": 77.41,
         "error": null
       },
       {
@@ -999,7 +999,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 4,
-        "latency_ms": 73.21,
+        "latency_ms": 71.88,
         "error": null
       },
       {
@@ -1008,7 +1008,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.66,
+        "latency_ms": 71.22,
         "error": null
       },
       {
@@ -1017,7 +1017,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.6,
+        "latency_ms": 69.81,
         "error": null
       },
       {
@@ -1026,7 +1026,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 6,
-        "latency_ms": 75.29,
+        "latency_ms": 73.93,
         "error": null
       },
       {
@@ -1035,7 +1035,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.1,
+        "latency_ms": 74.91,
         "error": null
       },
       {
@@ -1044,7 +1044,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 74.64,
+        "latency_ms": 69.94,
         "error": null
       },
       {
@@ -1053,7 +1053,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 73.99,
+        "latency_ms": 78.99,
         "error": null
       },
       {
@@ -1062,7 +1062,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 74.58,
+        "latency_ms": 74.13,
         "error": null
       },
       {
@@ -1071,7 +1071,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 73.18,
+        "latency_ms": 70.3,
         "error": null
       },
       {
@@ -1080,7 +1080,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 5,
-        "latency_ms": 73.85,
+        "latency_ms": 71.39,
         "error": null
       },
       {
@@ -1089,7 +1089,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 71.22,
+        "latency_ms": 69.34,
         "error": null
       },
       {
@@ -1098,7 +1098,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 72.82,
+        "latency_ms": 66.77,
         "error": null
       },
       {
@@ -1107,7 +1107,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 80.37,
+        "latency_ms": 77.66,
         "error": null
       },
       {
@@ -1116,7 +1116,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 75.79,
+        "latency_ms": 68.31,
         "error": null
       },
       {
@@ -1125,7 +1125,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 76.08,
+        "latency_ms": 72.6,
         "error": null
       },
       {
@@ -1134,7 +1134,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 68.11,
+        "latency_ms": 64.97,
         "error": null
       },
       {
@@ -1143,7 +1143,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 77.68,
+        "latency_ms": 76.33,
         "error": null
       },
       {
@@ -1152,7 +1152,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 2,
-        "latency_ms": 71.7,
+        "latency_ms": 74.59,
         "error": null
       },
       {
@@ -1161,7 +1161,7 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 75.66,
+        "latency_ms": 71.08,
         "error": null
       },
       {
@@ -1170,17 +1170,10 @@
         "variant": "rrf",
         "hit": true,
         "rank": 1,
-        "latency_ms": 73.02,
+        "latency_ms": 71.69,
         "error": null
       }
     ],
     "rrf+rerank": []
-  },
-  "latency_boundary": {
-    "measured": "retrieval after query encode (timer starts at eval_retrieval.py:79 with query_vector ready)",
-    "encode_p50_ms": 1428.13,
-    "encode_p95_ms": 2026.74,
-    "encode_n": 40,
-    "prior_full_path_dense_p95_ms": 2082
   }
 }
