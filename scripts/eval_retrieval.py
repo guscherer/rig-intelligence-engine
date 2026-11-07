@@ -466,13 +466,11 @@ async def main() -> None:  # noqa: PLR0915
         encode_p95_ms=encode_p95_ms,
         model_load_ms=model_load_ms,
     )
-    report_sha256 = hashlib.sha256(report.encode("utf-8")).hexdigest()
+    REPORT_PATH.write_text(report, encoding="utf-8")
+    report_sha256 = hashlib.sha256(REPORT_PATH.read_bytes()).hexdigest()
     payload["provenance"]["report_sha256"] = report_sha256
 
-    with JSON_PATH.open("w", encoding="utf-8", newline=chr(10)) as f:
-        f.write(json.dumps(payload, ensure_ascii=False, indent=2))
-    with REPORT_PATH.open("w", encoding="utf-8", newline=chr(10)) as f:
-        f.write(report)
+    JSON_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Relatório: {REPORT_PATH}")
     print(f"JSON: {JSON_PATH}")
 

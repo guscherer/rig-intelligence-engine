@@ -1201,6 +1201,6 @@
     "git_head": "d835ca628418d1800514f0e273211d600008f431",
     "command": "uv run python scripts/eval_retrieval.py",
     "log_sha256": "caae8a9f881011e1e266e95eb1f241bcd21a1cceb5e5e88ebf0af3ea66d93c62",
-    "report_sha256": "04135e9ef1c038e20a8199f1a1a8e5c1dc5db9065ed2519ba489d9406c0531ea"
+    "report_sha256": "3c66f57f5da9870004a2b1102422f20773a5d2de9c92f2f73929156f040ac3d1"
   }
 }

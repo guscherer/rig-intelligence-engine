@@ -5,6 +5,7 @@ Roda sem rede, modelo ou banco: apenas le o JSON e o relatorio ja publicados.
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
@@ -56,6 +57,12 @@ def test_recall_recomputes_from_per_query() -> None:
         mrr = sum(rrs) / n if n else 0.0
         assert abs(declared["recall_at_8"] - hits / n) < 1e-9, name
         assert abs(declared["mrr_at_8"] - mrr) < 1e-9, name
+
+
+def test_provenance_hashes_match_files() -> None:
+    data = _load()
+    prov = data["provenance"]
+    assert prov["report_sha256"] == hashlib.sha256(REPORT_PATH.read_bytes()).hexdigest()
 
 
 def test_report_matches_json() -> None:
