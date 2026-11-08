@@ -1,3 +1,5 @@
+from rig.graph.nodes.draft import DraftError, DraftResult, draft
+from rig.graph.nodes.positioning import PositioningBrief, positioning
 from rig.graph.nodes.retrieve import (
     RetrievedChunk,
     RetrieveResult,
@@ -17,13 +19,18 @@ from rig.graph.nodes.triage import (
 )
 
 __all__ = [
+    "DraftError",
+    "DraftResult",
     "EvidenceSpan",
+    "PositioningBrief",
     "RetrieveResult",
     "RetrievedChunk",
     "TriageResult",
     "async_retrieve",
     "async_triage",
     "compute_triage_score",
+    "draft",
+    "positioning",
     "retrieve",
     "retrieve_node",
     "run_retrieve",
