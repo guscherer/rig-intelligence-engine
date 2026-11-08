@@ -10,10 +10,15 @@ import sys
 from rig.retrieval.search import SearchFilters, run_search
 
 
-def main_sync() -> None:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Busca híbrida RIG")
     parser.add_argument("query", nargs="*")
-    parser.add_argument("--mode", default="rrf+rerank")
+    parser.add_argument(
+        "--mode",
+        choices=("dense", "rrf", "rrf+rerank"),
+        default="dense",
+        help="Modo de busca (default: dense). Opções: dense, rrf, rrf+rerank.",
+    )
     parser.add_argument("--limit", type=int, default=8)
     parser.add_argument("--candidate-k", type=int, default=50)
     parser.add_argument("--kind", default=None)
@@ -23,6 +28,11 @@ def main_sync() -> None:
     parser.add_argument("--ano", type=int, default=None)
     parser.add_argument("--tema", default=None)
     parser.add_argument("--no-rerank", action="store_true", default=False)
+    return parser
+
+
+def main_sync() -> None:
+    parser = _build_parser()
     args = parser.parse_args()
 
     query = " ".join(args.query).strip()
