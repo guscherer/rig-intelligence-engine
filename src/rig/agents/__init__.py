@@ -1,5 +1,5 @@
 """Pacote agents do RIG Intelligence Engine."""
 
-from rig.agents.state import BudgetExceeded, BudgetState, RetrievedChunk, RIGState
+from rig.graph.state import BudgetExceededError, BudgetState, RetrievedChunk, RIGState
 
-__all__ = ["BudgetExceeded", "BudgetState", "RIGState", "RetrievedChunk"]
+__all__ = ["BudgetExceededError", "BudgetState", "RIGState", "RetrievedChunk"]

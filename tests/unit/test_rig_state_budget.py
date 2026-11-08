@@ -7,7 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from rig.core.config import Settings
-from rig.graph.state import BudgetExceeded, BudgetState, RIGState
+from rig.graph.state import BudgetExceededError, BudgetState, RIGState
 
 
 def test_rig_state_rejects_extra_field() -> None:
@@ -25,14 +25,14 @@ def test_budget_defaults_from_spec() -> None:
 def test_budget_cost_overflow_raises() -> None:
     b = BudgetState(max_cost_usd=0.0, deadline_s=10**9)
     b.add_cost(0.01)
-    with pytest.raises(BudgetExceeded):
+    with pytest.raises(BudgetExceededError):
         b.check()
 
 
 def test_budget_deadline_overflow_raises() -> None:
     b = BudgetState(max_cost_usd=10.0, deadline_s=0)
     time.sleep(0.01)
-    with pytest.raises(BudgetExceeded):
+    with pytest.raises(BudgetExceededError):
         b.check()
 
 
@@ -53,7 +53,7 @@ def test_config_missing_key_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     # also avoid .env loading by pointing to empty? Settings reads .env file; ensure env missing
     with pytest.raises(Exception) as exc:
-        Settings(_env_file=os.devnull)  # type: ignore[call-arg]
+        Settings(_env_file=os.devnull)
     assert "DEEPSEEK_API_KEY" in str(exc.value)
 
 

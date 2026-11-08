@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 
 from pydantic import Field, SecretStr
@@ -28,7 +29,7 @@ class Settings(BaseSettings):
     model_draft: str = Field("deepseek-flash", alias="MODEL_DRAFT")
     model_embedding: str = Field("BAAI/bge-m3", alias="MODEL_EMBEDDING")
     embedding_dim: int = Field(1024, alias="EMBEDDING_DIM")
-    database_url: str = Field("postgresql://rig:rig@localhost:5432/rig", alias="DATABASE_URL")
+    database_url: str = Field("postgresql://rig:***@localhost:5432/rig", alias="DATABASE_URL")
     redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")
     max_cost_usd_per_run: float = Field(0.20, alias="MAX_COST_USD_PER_RUN")
     max_deadline_s: int = Field(90, alias="MAX_DEADLINE_S")
@@ -58,45 +59,9 @@ class Settings(BaseSettings):
         return self.model_draft
 
 
-# Aliases de nome (compatibilidade).
-Config = Settings
-LLMSettings = Settings
-LLMConfig = Settings
-AppSettings = Settings
-AppConfig = Settings
-
-
+@lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return Settings()  # type: ignore[call-arg]
+    return Settings(**{})
 
 
-def load_settings() -> Settings:
-    return Settings()  # type: ignore[call-arg]
-
-
-def get_config() -> Settings:
-    return Settings()  # type: ignore[call-arg]
-
-
-def load_config() -> Settings:
-    return Settings()  # type: ignore[call-arg]
-
-
-# Aliases funcionais.
-get_llm_settings = get_settings
-get_llm_config = get_config
-
-__all__ = [
-    "AppConfig",
-    "AppSettings",
-    "Config",
-    "LLMConfig",
-    "LLMSettings",
-    "Settings",
-    "get_config",
-    "get_llm_config",
-    "get_llm_settings",
-    "get_settings",
-    "load_config",
-    "load_settings",
-]
+__all__ = ["Settings", "get_settings"]
