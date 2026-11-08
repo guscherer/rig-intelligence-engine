@@ -153,3 +153,21 @@ Formato curto: contexto → decisão → consequência → o que foi rejeitado. 
 **Rejeitado.** Gemini `embedding-001` (bloqueio de chave + custo por doc), OpenAI `text-embedding-3` (idem, e menos forte em PT que bge-m3), `e5-small` (384 dims, mais barato de rodar e claramente mais fraco em texto jurídico longo).
 
 ---
+
+---
+
+## ADR-012 — Provedor de geração: DeepSeek em vez de Gemini
+
+**Contexto.** ADR-006 escolheu Gemini Flash para iteração rápida com modelo forte só na redação, com modelos configuráveis por nó em `config/models.yaml`. A implementação do F2 troca o provedor para DeepSeek (`https://api.deepseek.com`), modelo `deepseek-flash` para todos os papéis (`MODEL_TRIAGE`, `MODEL_AUDIT`, `MODEL_DRAFT`).
+
+**Decisão.** Usar DeepSeek como provedor único de geração no F2, lido de configuração (`LLM_PROVIDER`, `LLM_BASE_URL`, `MODEL_*`), sem hardcode de chave (SecretStr). Papéis: `MODEL_TRIAGE=deepseek-flash`, `MODEL_AUDIT=deepseek-flash`, `MODEL_DRAFT=deepseek-flash`.
+
+**Motivo.** (a) Disponibilidade de chave no ambiente de desenvolvimento; (b) endpoint OpenAI-compatível, mantendo o protocolo `StructuredGenerator` (DIP, docs/10 §4) sem SDK de provedor fora de `adapters/`; (c) custo de iteração compatível com o teto de ~US$ 10 do desenvolvimento.
+
+**Achado dos reasoning tokens (medido, 2026-11-07).** Uma resposta de 179 tokens totais consumiu 63 tokens de reasoning — custo real ~2,7× o texto visível. `completion_tokens` já inclui os reasoning tokens. Um gate que conta só o output aparente estoura o orçamento em silêncio. A contabilização soma `prompt_tokens + completion_tokens` e registra `reasoning_tokens` separadamente (em `BudgetState`).
+
+**Observação.** `deepseek-v4-pro` existe no endpoint e é candidato a `MODEL_DRAFT` se a qualidade da redação institucional exigir. A troca, se houver, será feita com avaliação (F5), não por suposição. ADR-006 permanece válido na estrutura (modelo configurável por nó); apenas o provedor padrão muda.
+
+**Consequência.** `.env.example` passa a usar chaves `DEEPSEEK_*` e `LLM_BASE_URL=https://api.deepseek.com`; `DATABASE_URL` usa `postgresql://` (sem `+asyncpg`, que é o que o código normaliza em `rig.core.db`). Nenhum valor de chave em log, erro ou `repr` da config.
+
+**Rejeitado.** Manter Gemini (chave não disponível no ambiente atual); hardcode de modelo no código (viola ADR-006).
