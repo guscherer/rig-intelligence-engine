@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rig.agents.retrieve import retrieve
+from rig.graph.nodes.retrieve import retrieve
 
 
 @pytest.mark.asyncio
