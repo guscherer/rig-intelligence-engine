@@ -166,7 +166,7 @@ class RIGState(BaseModel):
     # Campos do fluxo (opcionais, preenchidos pelos nós).
     proposition: str | None = None
     mandate: str | None = None
-    triage: str | None = None
+    triage: Any | None = None
     position: str | None = None
     draft: str | None = None
     audit: str | None = None
