@@ -46,6 +46,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+MIN_SPAN_CHARS = 20  # abaixo disso o span não é evidência: é substring acidental
+
 _CITATION_RE = re.compile(r"\[C(\d+)\]")
 
 # Fim de sentença: . ! ? ; — exceto ponto que separa dígitos (milhar/decimal).
@@ -358,7 +360,9 @@ def validate_evidence_spans(evidence_spans: Sequence[Any], chunks: Sequence[Any]
     """Valida que cada span é substring literal do texto do chunk (após ``strip``).
 
     Levanta :class:`UnresolvedCitationError` para índice fora do intervalo e
-    :class:`InvalidEvidenceSpanError` para span que não é substring literal.
+    :class:`InvalidEvidenceSpanError` para span que não é substring literal,
+    para span com menos de :data:`MIN_SPAN_CHARS` caracteres (após ``strip``)
+    ou para span composto apenas de pontuação e/ou espaços.
     """
     for entry in evidence_spans:
         index, span = _unpack_span(entry)
@@ -366,7 +370,18 @@ def validate_evidence_spans(evidence_spans: Sequence[Any], chunks: Sequence[Any]
             raise UnresolvedCitationError(
                 f"evidence_span aponta para índice {index}, mas há {len(chunks)} chunk(s)"
             )
-        if span.strip() not in chunk_text(chunks[index - 1]).strip():
+        stripped = span.strip()
+        if stripped and not any(ch.isalnum() for ch in stripped):
+            raise InvalidEvidenceSpanError(
+                f"evidence_span da citação [C{index}] é composto apenas de "
+                f"pontuação e/ou espaços ({len(stripped)} caracteres)"
+            )
+        if len(stripped) < MIN_SPAN_CHARS:
+            raise InvalidEvidenceSpanError(
+                f"evidence_span da citação [C{index}] tem {len(stripped)} "
+                f"caracteres, mínimo {MIN_SPAN_CHARS}"
+            )
+        if stripped not in chunk_text(chunks[index - 1]).strip():
             raise InvalidEvidenceSpanError(
                 f"evidence_span da citação [C{index}] não é substring literal do "
                 f"chunk {chunk_id(chunks[index - 1])!r}"
@@ -386,6 +401,7 @@ def validate_draft(text: str, chunks: Sequence[Any], evidence_spans: Sequence[An
 
 
 __all__ = [
+    "MIN_SPAN_CHARS",
     "Citation",
     "CitationError",
     "CitationSpan",
