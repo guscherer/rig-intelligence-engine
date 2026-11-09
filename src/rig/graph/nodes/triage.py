@@ -14,6 +14,12 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from rig.adapters import GenerationError
+
+
+class TriageError(GenerationError):
+    """Falha de classificação/triagem (provedor ou payload inválido)."""
+
 
 class EvidenceSpan(BaseModel):
     """Trecho literal citado pelo modelo na classificação."""
@@ -51,10 +57,6 @@ def compute_triage_score(data: Any) -> float:  # noqa: C901, PLR0912
 
     relevante = bool(data.get("relevante", False))
     if not relevante:
-        # Relevância negativa pode ainda carregar confiança parcial via temas.
-        temas = data.get("temas") or data.get("axes") or []
-        if not temas:
-            return 0.0
         return 0.0
 
     temas = data.get("temas") or data.get("axes") or []
@@ -111,8 +113,15 @@ def compute_triage_score(data: Any) -> float:  # noqa: C901, PLR0912
     return float(score)
 
 
-def _to_dict(obj: Any) -> dict[str, Any]:
+def _to_dict(obj: Any) -> dict[str, Any]:  # noqa: C901, PLR0912
     if isinstance(obj, BaseModel):
+        # Adapter de provedor: extrai o conteúdo textual.
+        if hasattr(obj, "content"):
+            content = obj.content
+            if isinstance(content, str):
+                return _to_dict(content)
+            if isinstance(content, (dict, BaseModel)):
+                return _to_dict(content)
         return obj.model_dump()
     if isinstance(obj, dict):
         return dict(obj)
@@ -122,13 +131,13 @@ def _to_dict(obj: Any) -> dict[str, Any]:
             return {}
         try:
             parsed = json.loads(text)
-            if isinstance(parsed, dict):
-                return parsed
-            if isinstance(parsed, list) and parsed and isinstance(parsed[0], dict):
-                return parsed[0]
-        except json.JSONDecodeError:
-            pass
-        return {"justificativa": text}
+        except json.JSONDecodeError as exc:
+            raise TriageError(f"JSON inválido na resposta do triage: {exc}") from exc
+        if isinstance(parsed, dict):
+            return parsed
+        if isinstance(parsed, list) and parsed and isinstance(parsed[0], dict):
+            return parsed[0]
+        raise TriageError("JSON inválido na resposta do triage: esperado objeto")
     # objeto com atributos
     out: dict[str, Any] = {}
     for key in (
@@ -146,61 +155,32 @@ def _to_dict(obj: Any) -> dict[str, Any]:
     ):
         if hasattr(obj, key):
             out[key] = getattr(obj, key)
+    if not out and hasattr(obj, "content"):
+        content = obj.content
+        if isinstance(content, str):
+            return _to_dict(content)
     return out
 
 
-async def _call_generator(gen: Any, prompt: str) -> Any:  # noqa: C901, PLR0912
-    """Chama o gerador mockado de forma tolerante a diferentes APIs."""
+async def _call_generator(gen: Any, prompt: str) -> Any:
+    """Chama o gerador tipado por ``StructuredGenerator`` (ou mock de teste).
+
+    Não engole exceções: falha de provedor/payload propaga. Suporta apenas
+    o protocolo (``generate``) ou um callable simples de teste.
+    """
     if gen is None:
         return {}
 
-    # Gerador é um callable simples.
-    if callable(gen) and not hasattr(gen, "generate") and not hasattr(gen, "complete"):
-        try:
-            res = gen(prompt)
-            if inspect.isawaitable(res):
-                res = await res
-            return res
-        except Exception:  # noqa: S110
-            pass
+    if hasattr(gen, "generate") and callable(gen.generate):
+        result = gen.generate(prompt)
+    elif callable(gen):
+        result = gen(prompt)
+    else:
+        raise TriageError("gerador não implementa StructuredGenerator nem é callable")
 
-    for name in (
-        "generate",
-        "complete",
-        "chat",
-        "structured",
-        "run",
-        "invoke",
-        "generate_structured",
-        "structured_generate",
-    ):
-        method = getattr(gen, name, None)
-        if callable(method):
-            for call in (
-                lambda m=method: m(prompt),
-                lambda m=method: m(prompt=prompt),
-                lambda m=method: m(messages=prompt),
-            ):
-                try:
-                    res = call()  # type: ignore[no-untyped-call]
-                    if inspect.isawaitable(res):
-                        res = await res
-                    return res
-                except TypeError:
-                    continue
-                except Exception:  # noqa: S112
-                    continue
-
-    if callable(gen):
-        try:
-            res = gen(prompt)
-            if inspect.isawaitable(res):
-                res = await res
-            return res
-        except Exception:
-            return {}
-
-    return {}
+    if inspect.isawaitable(result):
+        result = await result
+    return result
 
 
 def _build_triage_prompt(ementa: Any, keywords: Any, temas: Any) -> str:
@@ -369,6 +349,8 @@ async_triage = _triage_impl
 
 __all__ = [
     "EvidenceSpan",
+    "GenerationError",
+    "TriageError",
     "TriageResult",
     "compute_triage_score",
     "run_triage",
