@@ -3,7 +3,7 @@
 PY := uv run
 SRC := src
 
-.PHONY: help install check lint format type arch test test-live size clean up down ingest ingest-smoke ingest-full embed search eval-retrieval
+.PHONY: help install check lint format type arch test test-live size clean up down ingest ingest-smoke ingest-full embed search eval-retrieval run
 
 help:
 > @echo "install  - cria venv e instala deps (dev)"
@@ -60,6 +60,9 @@ embed:
 
 search:
 > $(PY) python scripts/search.py $(filter-out $@,$(MAKECMDGOALS))
+
+run:
+> $(PY) python scripts/run.py $(filter-out $@,$(MAKECMDGOALS))
 
 eval-retrieval:
 > $(PY) python scripts/eval_retrieval.py

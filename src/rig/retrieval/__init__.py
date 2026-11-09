@@ -13,6 +13,7 @@ from rig.retrieval.embed import (
     model_name,
     validate_dimension,
 )
+from rig.retrieval.fetch import fetch_doc_chunks, fetch_document
 from rig.retrieval.search import (
     DEFAULT_CANDIDATE_K,
     DEFAULT_LIMIT,
@@ -38,6 +39,8 @@ __all__ = [
     "dense_search",
     "embedding_dim",
     "encode_texts",
+    "fetch_doc_chunks",
+    "fetch_document",
     "load_encoder",
     "model_name",
     "rerank_results",

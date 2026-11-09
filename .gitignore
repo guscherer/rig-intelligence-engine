@@ -22,10 +22,9 @@ data/cache/
 data/manifest.json
 !data/manifest.fixtures.json
 
-# Artefatos
-reports/*.html
-!reports/*.md
-!reports/*.json
+# Artefatos de run (ADR-009): a minuta deriva de texto de terceiros; o run.json
+# registra custo real por execução. Nada sob reports/ é versionado.
+reports/
 
 # OS/editor
 .DS_Store
