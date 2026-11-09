@@ -33,8 +33,10 @@ from rig.core.config import Settings, get_settings
 from rig.graph.citations import CitationError, CitationSpan
 from rig.graph.nodes.draft import DraftResult, draft
 from rig.graph.nodes.positioning import positioning
+from rig.graph.nodes.retrieve import retrieve
 from rig.graph.nodes.triage import triage
-from rig.graph.state import BudgetExceededError, BudgetState
+from rig.graph.state import BudgetExceededError, BudgetState, RIGState
+from rig.graph.state import RetrievedChunk as StateRetrievedChunk
 
 DocumentLoader = Callable[[str], Awaitable[dict[str, Any] | None]]
 ChunkLoader = Callable[[str], Awaitable[list[Any]]]
@@ -138,6 +140,125 @@ def _node_generator(
     return call
 
 
+def _to_state_chunks(items: list[Any]) -> list[StateRetrievedChunk]:
+    out: list[StateRetrievedChunk] = []
+    for item in items or []:
+        if isinstance(item, StateRetrievedChunk):
+            out.append(item)
+            continue
+        if isinstance(item, dict):
+            out.append(
+                StateRetrievedChunk(
+                    chunk_id=str(item.get("chunk_id", item.get("id", ""))),
+                    doc_id=item.get("doc_id"),
+                    score=item.get("score"),
+                    breadcrumb=item.get("breadcrumb"),
+                    text=item.get("text", item.get("chunk_text")),
+                    kind=item.get("kind"),
+                )
+            )
+            continue
+        out.append(
+            StateRetrievedChunk(
+                chunk_id=str(getattr(item, "chunk_id", getattr(item, "id", item))),
+                doc_id=getattr(item, "doc_id", None),
+                score=getattr(item, "score", None),
+                breadcrumb=getattr(item, "breadcrumb", None),
+                text=getattr(item, "text", getattr(item, "chunk_text", None)),
+                kind=getattr(item, "kind", None),
+            )
+        )
+    return out
+
+
+async def _draft_with_repair(
+    *,
+    generator: StructuredGenerator,
+    budget: BudgetState,
+    modelos: dict[str, str],
+    settings: Settings,
+    chunks: list[Any],
+    ementa: str,
+    position_brief: Any,
+) -> DraftResult:
+    draft_gen = _node_generator(
+        generator,
+        budget,
+        modelos,
+        "draft",
+        settings,
+        _NodeLLM(
+            model=settings.model_draft,
+            json_mode=True,
+            temperature=DRAFT_TEMPERATURE,
+            max_tokens=DRAFT_MAX_TOKENS,
+            effort="low",
+        ),
+    )
+    revision_notes: list[str] = []
+    draft_result: DraftResult | None = None
+    for attempt in range(2):
+        try:
+            draft_result = await draft(
+                positioning=position_brief,
+                chunks=chunks,
+                generator=draft_gen,
+                proposition=ementa,
+                revision_notes=revision_notes,
+            )
+            break
+        except CitationError as exc:
+            if attempt == 0:
+                revision_notes = [str(exc)]
+                continue
+            raise
+    if draft_result is None:
+        raise RuntimeError("draft não produziu resultado")
+    return draft_result
+
+
+async def _run_relevant_path(
+    *,
+    ementa: str,
+    doc_id: str,
+    load_chunks: ChunkLoader,
+    generator: StructuredGenerator,
+    budget: BudgetState,
+    modelos: dict[str, str],
+    settings: Settings,
+    state: RIGState,
+) -> tuple[list[Any], DraftResult]:
+    retrieved = await retrieve(
+        query=ementa,
+        filters={"doc_id": doc_id},
+        doc_id=doc_id,
+        search=lambda q, filters=None: load_chunks(doc_id),  # noqa: ARG005
+    )
+    retrieved_list = list(retrieved) if retrieved is not None else []
+    state.retrieved = _to_state_chunks(retrieved_list)
+
+    chunks = retrieved_list if retrieved_list else await load_chunks(doc_id)
+    if not chunks:
+        raise RuntimeError(f"documento {doc_id!r} não possui chunks no corpus")
+
+    position_brief = await positioning(corpus=None)
+    state.position = position_brief
+
+    budget.check()
+    draft_result = await _draft_with_repair(
+        generator=generator,
+        budget=budget,
+        modelos=modelos,
+        settings=settings,
+        chunks=chunks,
+        ementa=ementa,
+        position_brief=position_brief,
+    )
+    state.draft = draft_result.markdown
+    budget.check()
+    return chunks, draft_result
+
+
 async def run_pipeline(
     *,
     doc_id: str,
@@ -166,8 +287,6 @@ async def run_pipeline(
     partial_reason: str | None = None
     evidence_spans: list[CitationSpan] = []
 
-    chunks: list[Any] = []
-
     try:
         meta = await load_document(doc_id)
         if meta is None:
@@ -189,54 +308,36 @@ async def run_pipeline(
                 max_tokens=TRIAGE_MAX_TOKENS,
             ),
         )
-        await triage(ementa=ementa, keywords=keywords, generator=triage_gen)
+        triage_result = await triage(ementa=ementa, keywords=keywords, generator=triage_gen)
         budget.check()
 
-        chunks = await load_chunks(doc_id)
-        if not chunks:
-            raise RuntimeError(f"documento {doc_id!r} não possui chunks no corpus")
+        # Estado tipado do grafo (RIGState): instanciado e preenchido para auditoria.
+        state = RIGState(run_id=run_id, doc_id=doc_id, budget=budget, proposition=ementa)
+        state.triage = triage_result
 
-        # positioning: sem corpus institucional, é honesto sinalizar insuficiente
-        # (docs/03 §4). Não há chamada de LLM — não gera custo.
-        await positioning(corpus=None)
-
-        budget.check()
-        draft_gen = _node_generator(
-            generator,
-            budget,
-            modelos,
-            "draft",
-            settings,
-            _NodeLLM(
-                model=settings.model_draft,
-                json_mode=True,
-                temperature=DRAFT_TEMPERATURE,
-                max_tokens=DRAFT_MAX_TOKENS,
-                effort="low",
-            ),
-        )
-        # Portão local (docs/03 §5): rejeita minuta sem citação. Uma única
-        # tentativa de reparo com o erro exato antes de desistir.
-        revision_notes: list[str] = []
-        draft_result: DraftResult | None = None
-        for attempt in range(2):
-            try:
-                draft_result = await draft(
-                    chunks=chunks,
-                    generator=draft_gen,
-                    proposition=ementa,
-                    revision_notes=revision_notes,
-                )
-                break
-            except CitationError as exc:
-                if attempt == 0:
-                    revision_notes = [str(exc)]
-                    continue
-                raise
-        if draft_result is not None:
+        if not getattr(triage_result, "relevante", True):
+            # Triage decidiu que a proposição não é relevante: curto-circuito,
+            # sem recuperar nem redigir (evita inventar em cima de base fraca).
+            state.status = "partial"
+            state.error = "skipped (insufficient_base): triage relevante=False"
+            partial_reason = state.error
+        else:
+            _chunks, draft_result = await _run_relevant_path(
+                ementa=ementa,
+                doc_id=doc_id,
+                load_chunks=load_chunks,
+                generator=generator,
+                budget=budget,
+                modelos=modelos,
+                settings=settings,
+                state=state,
+            )
             markdown = draft_result.markdown
             evidence_spans = draft_result.evidence_spans
-        budget.check()
+
+        if partial_reason is None:
+            state.status = "ok"
+        state.cost_usd = budget.spent_usd
     except BudgetExceededError as exc:
         partial_reason = str(exc)
     except Exception as exc:  # borda do run: qualquer falha vira partial, nunca derruba
