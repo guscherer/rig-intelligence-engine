@@ -18,6 +18,7 @@ config; nunca é um número inventado.
 
 from __future__ import annotations
 
+import inspect
 import json
 import time
 import uuid
@@ -171,6 +172,17 @@ def _to_state_chunks(items: list[Any]) -> list[StateRetrievedChunk]:
     return out
 
 
+async def _await_if_needed(value: Any) -> Any:
+    """Aguarda o valor se for awaitable; caso contrário, devolve-o direto.
+
+    Permite que nós (ou mocks de teste) sejam síncronos ou assíncronos sem
+    que o runner precise conhecer a forma de chamada.
+    """
+    if inspect.isawaitable(value):
+        return await value
+    return value
+
+
 async def _draft_with_repair(
     *,
     generator: StructuredGenerator,
@@ -228,11 +240,13 @@ async def _run_relevant_path(
     settings: Settings,
     state: RIGState,
 ) -> tuple[list[Any], DraftResult]:
-    retrieved = await retrieve(
-        query=ementa,
-        filters={"doc_id": doc_id},
-        doc_id=doc_id,
-        search=lambda q, filters=None: load_chunks(doc_id),  # noqa: ARG005
+    retrieved = await _await_if_needed(
+        retrieve(
+            query=ementa,
+            filters={"doc_id": doc_id},
+            doc_id=doc_id,
+            search=lambda q, filters=None: load_chunks(doc_id),  # noqa: ARG005
+        )
     )
     retrieved_list = list(retrieved) if retrieved is not None else []
     state.retrieved = _to_state_chunks(retrieved_list)
@@ -241,7 +255,16 @@ async def _run_relevant_path(
     if not chunks:
         raise RuntimeError(f"documento {doc_id!r} não possui chunks no corpus")
 
-    position_brief = await positioning(corpus=None)
+    # Chunks institucionais (kind="institucional"), quando existirem no
+    # conjunto recuperado; caso contrário, o nó sinaliza insuficiente.
+    institutional_chunks = [
+        c
+        for c in retrieved_list
+        if (c.get("kind") if isinstance(c, dict) else getattr(c, "kind", None)) == "institucional"
+    ]
+    position_brief = await _await_if_needed(
+        positioning(corpus=institutional_chunks if institutional_chunks else None)
+    )
     state.position = position_brief
 
     budget.check()
