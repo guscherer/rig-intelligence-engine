@@ -49,17 +49,48 @@ def _build_draft_prompt(
     positioning: PositioningBrief | None,
     chunks: Sequence[Any],
     proposition: str,
+    revision_notes: Sequence[str] = (),
 ) -> str:
     restricoes = "\n".join(f"- {r}" for r in (positioning.restricoes if positioning else []))
     fontes = "\n".join(
         f"[C{i}] {chunk_id(c)} — {chunk_text(c)}" for i, c in enumerate(chunks, start=1)
     )
+    notas = "\n".join(f"- {n}" for n in revision_notes)
     return (
-        "Redija a minuta em Markdown. Cada frase que afirma fato, número, prazo "
-        "ou obrigação termina com [C<n>], onde n indexa FONTES.\n"
+        "Redija uma minuta técnica em Markdown sobre a proposição, usando títulos "
+        "de seção e, sob cada título, uma lista de afirmações.\n\n"
+        "REGRAS DE CITAÇÃO — validação MECÂNICA, sem exceção:\n"
+        "- Cada frase de conteúdo (que fala sobre o projeto) DEVE terminar com "
+        "[C<n>], onde n é o índice (1-based) da fonte em FONTES que a sustenta.\n"
+        "- Uma frase exige citação quando contém número, prazo, data, percentual "
+        "ou valor, OU quando tem verbo de efeito/obrigação (estabelece, determina, "
+        "dispõe, define, cria, altera, modifica, revoga, aplica, veda, proíbe, "
+        "permite, exige, obriga, prevê, institui, assegura, garante).\n"
+        '- Atenção: frases como "A Lei não se aplica a X" ou "A Lei prevê Y" têm '
+        "verbo factual e TAMBÉM exigem [C<n>].\n"
+        "- Títulos de seção (linhas começando com #) não precisam de citação.\n"
+        "- Não escreva parágrafo introdutório sem citação: se descreve o projeto, "
+        "cite a fonte.\n\n"
+        "Exemplo VÁLIDO:\n"
+        "## Escopo\n"
+        "- A Lei estabelece normas gerais de governança de IA [C2].\n\n"
+        "Exemplo INVÁLIDO (a minuta inteira será rejeitada):\n"
+        "- A Lei não se aplica a uso particular. (sem [C<n>])\n\n"
         f"Proposição: {proposition}\n"
         f"Restrições (não afirmar):\n{restricoes or '(nenhuma)'}\n\n"
-        f"FONTES:\n{fontes}"
+        f"FONTES:\n{fontes}\n\n"
+        + (
+            f"Correções obrigatórias da revisão anterior (aplique TODAS):\n{notas}\n\n"
+            if notas
+            else ""
+        )
+        + "Responda APENAS com um objeto JSON com exatamente estes campos:\n"
+        '{"markdown": <string com a minuta em Markdown>, '
+        '"evidence_spans": [{"citation": <n>, "span": <string>}, ...]}\n\n'
+        'Para cada citação [C<n>] usada, inclua um item em "evidence_spans" com o '
+        'mesmo n e, em "span", um trecho COPIADO VERBATIM (substring literal) do '
+        "texto da fonte [Cn] em FONTES, com ao menos 20 caracteres. Não parafraseie "
+        "o span: copie exatamente, inclusive acentuação e pontuação."
     )
 
 
@@ -85,10 +116,11 @@ async def _draft_impl(
     *,
     generator: Any,
     proposition: str,
+    revision_notes: Sequence[str] = (),
 ) -> DraftResult:
     if generator is None:
         raise DraftError("draft exige um gerador (LLM mockado nos testes)")
-    prompt = _build_draft_prompt(positioning, chunks, proposition)
+    prompt = _build_draft_prompt(positioning, chunks, proposition, revision_notes)
     raw = await _call_generator(generator, prompt)
     markdown, spans = _parse_draft_output(raw)
     validate_draft(markdown, chunks, spans)
@@ -101,15 +133,28 @@ def draft(
     *,
     generator: Any = None,
     proposition: str = "",
+    revision_notes: Sequence[str] = (),
 ) -> Any:
     """Entrada pública do nó ``draft`` (síncrona ou assíncrona)."""
     try:
         asyncio.get_running_loop()
     except RuntimeError:
         return asyncio.run(
-            _draft_impl(positioning, chunks, generator=generator, proposition=proposition)
+            _draft_impl(
+                positioning,
+                chunks,
+                generator=generator,
+                proposition=proposition,
+                revision_notes=revision_notes,
+            )
         )
-    return _draft_impl(positioning, chunks, generator=generator, proposition=proposition)
+    return _draft_impl(
+        positioning,
+        chunks,
+        generator=generator,
+        proposition=proposition,
+        revision_notes=revision_notes,
+    )
 
 
 __all__ = ["DraftError", "DraftResult", "draft"]

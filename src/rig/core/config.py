@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")
     max_cost_usd_per_run: float = Field(0.20, alias="MAX_COST_USD_PER_RUN")
     max_deadline_s: int = Field(90, alias="MAX_DEADLINE_S")
+    # Preços por token do DeepSeek (lista oficial, janela off-peak, cache miss):
+    # https://api-docs.deepseek.com/quick_start/pricing/ — deepseek-flash:
+    # US$ 0,15 / 1M input e US$ 0,60 / 1M output. Raciocínio já está embutido no
+    # completion_tokens (ADR-012), portanto não é precificado em separado.
+    input_cost_per_token: float = Field(1.5e-7, alias="INPUT_COST_PER_TOKEN")
+    output_cost_per_token: float = Field(6.0e-7, alias="OUTPUT_COST_PER_TOKEN")
 
     @property
     def api_key(self) -> SecretStr:
