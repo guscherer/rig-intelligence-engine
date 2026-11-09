@@ -115,6 +115,35 @@ def test_evidence_span_missing_chunk_index_is_an_error() -> None:
         validate_evidence_spans(spans, CHUNKS)
 
 
+# ── Portão de tamanho mínimo do evidence_span ───────────────────────────────
+
+
+def test_evidence_span_too_short_is_rejected() -> None:
+    spans = [CitationSpan(citation=1, span="de")]
+    with pytest.raises(InvalidEvidenceSpanError) as exc_info:
+        validate_evidence_spans(spans, CHUNKS)
+    msg = str(exc_info.value)
+    assert "2" in msg
+    assert str(20) in msg
+
+
+def test_evidence_span_punctuation_only_is_rejected() -> None:
+    spans = [CitationSpan(citation=1, span=".")]
+    with pytest.raises(InvalidEvidenceSpanError):
+        validate_evidence_spans(spans, CHUNKS)
+
+
+def test_evidence_span_long_enough_passes() -> None:
+    spans = [CitationSpan(citation=1, span="altera a alíquota do ICMS")]
+    validate_evidence_spans(spans, CHUNKS)
+
+
+def test_evidence_span_exactly_min_passes() -> None:
+    spans = [CitationSpan(citation=1, span="líquota do ICMS de 1")]
+    assert len("líquota do ICMS de 1") == 20
+    validate_evidence_spans(spans, CHUNKS)
+
+
 # ── Minuta válida ────────────────────────────────────────────────────────
 
 
@@ -126,7 +155,7 @@ def test_valid_draft_is_accepted() -> None:
     )
     spans = [
         CitationSpan(citation=1, span="altera a alíquota do ICMS"),
-        CitationSpan(citation=2, span="prazo de 90 dias"),
+        CitationSpan(citation=2, span="estabelece prazo de 90 dias"),
     ]
     validate_draft(text, CHUNKS, spans)
 
@@ -157,7 +186,7 @@ def test_draft_node_accepts_valid_mock_output() -> None:
             ),
             "evidence_spans": [
                 {"citation": 1, "span": "altera a alíquota do ICMS"},
-                {"citation": 2, "span": "prazo de 90 dias"},
+                {"citation": 2, "span": "estabelece prazo de 90 dias"},
             ],
         }
 
