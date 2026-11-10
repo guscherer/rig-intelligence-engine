@@ -90,10 +90,13 @@ Decisões de arquitetura com o porquê: [`docs/09-decisions.md`](docs/09-decisio
 
 | Métrica | Valor medido |
 |---|---|
-| Documentos ingeridos | 2 |
-| Chunks gerados | 7 |
 | Tempo de extração + chunking (2 docs) | 0,21 s |
 | Taxa de chunks com `kind` válido | 7/7 (100%) |
+
+Medições separadas (ambas medidas nesta execução):
+
+- `fixture de teste (tests/fixtures/proposicoes/) — 2 documentos, 7 chunks — medido em 2026-11-10 via make ingest-smoke`
+- `corpus ingerido (Postgres / rig-db) — 295 documentos, 2448 chunks — medido em 2026-11-10 via docker exec rig-db psql -U rig -d rig -c "select (select count(*) from documents) as docs, (select count(*) from chunks) as chunks;"`
 
 Corpus: PL 3878/2024 (3 páginas, 4 chunks) e PL 2220/2024 (1 página, 3 chunks), ambos da Câmara dos Deputados, com atribuição. Hashes e metadados em [`data/manifest.fixtures.json`](data/manifest.fixtures.json). Texto integral não é versionado (ADR-009); obtido via `make ingest` (requer rede).
 
