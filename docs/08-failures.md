@@ -99,3 +99,14 @@ Modelos de falhas que a spec já antecipa e que serão registradas quando ocorre
 - **Correção:** artefato autêntico recommitado a partir da execução real (bench.log sha256 `caae8a9f881011e1e266e95eb1f241bcd21a1cceb5e5e88ebf0af3ea66d93c62`); bloco `provenance` (`git_head`, `command`, `log_sha256`, `report_sha256`) adicionado ao `payload` de `scripts/eval_retrieval.py`; 4 invariantes em `tests/unit/test_eval_invariants.py`.
 - **Caso de teste:** `tests/unit/test_eval_invariants.py::test_dense_latency_exceeds_encode`, `::test_latency_mean_not_below_p50`, `::test_recall_recomputes_from_per_query`, `::test_report_matches_json`, `::test_provenance_hashes_match_files`.
 - **Residual:** proveniência depende da existência de `bench.log` no diretório de execução; sem log, `log_sha256` fica `null` e a ligação se quebra (detectável pelo gate).
+
+### F-013 — relatório de eval mascarou gate degradado (skipped não contado, exit 0 com passo falhando)
+
+- **Data:** 2026-11-10
+- **Fase:** F0
+- **Sintoma:** com Postgres fora de alcance, `DATABASE_URL='postgresql://rig:***@localhost:5432/rig' uv run python scripts/eval_report.py` imprimia `gate: 115 passed, 0 failed (ruff=OK, format=OK, mypy=OK, arch=OK, pytest=OK)` e saía com `EXIT=0`, embora 16 testes de integração tivessem skipado. `gather_gate()` só extraía `(\d+) passed` e `(\d+) failed`; `skipped` nunca entrava na conta e nenhum passo influenciava o exit code.
+- **Impacto:** o relatório, que existe para ser prova de gate, afirmava "tudo OK" com 16 testes ausentes — pior do que não imprimir nada.
+- **Causa raiz:** `gather_gate()` não contava `skipped` e `main()` sempre retornava 0 após escrever o arquivo; passos com código != 0 não propagavam status.
+- **Correção:** `scripts/eval_report.py` agora inclui `skipped` na linha `gate:` (`<p> passed, <f> failed, <s> skipped (...)`), imprime `gate: FAILED — <passos>` e retorna exit != 0 quando qualquer passo falha (arquivo ainda é escrito); `tests/unit/test_eval_report_gate.py` cobre os três casos.
+- **Caso de teste:** `tests/unit/test_eval_report_gate.py::test_gate_green`, `::test_gate_degraded`, `::test_gate_failed_step`.
+- **Residual:** este card fecha a honestidade do gatilho de gate (contagem de skipped + exit code por passo falhando); o que resta é manter o Postgres de pé para o gate ser realmente verde (F-008).
