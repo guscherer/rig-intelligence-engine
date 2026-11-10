@@ -124,7 +124,7 @@ Verificado em 2026-11-05 (Docker 29.9.3 / Compose v5.7.0, WSL2 Ubuntu 26.04):
 ```bash
 make ingest                   # baixa e indexa o corpus real da Câmara
 make demo                     # PL 2338/2023 ponta a ponta até o card no Slack
-make eval                     # golden set + relatório com CI
+make eval                     # gera reports/eval-<AAAA-MM-DD>.md (commit, corpus, gate, retrieval) com proveniência
 ```
 
 > **Nota de ambiente:** o Docker aqui roda como Docker Engine *dentro* do WSL2 (Ubuntu), não Docker Desktop. Em outra máquina, Docker Desktop ou Engine nativo funcionam igual — o compose não depende do WSL.
