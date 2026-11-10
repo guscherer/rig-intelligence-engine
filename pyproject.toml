@@ -102,7 +102,6 @@ ban-relative-imports = "all"
 "src/rig/adapters/**" = ["TID251"]                    # aqui o SDK é permitido
 "src/rig/eval/**" = ["T20"]                           # relatório imprime
 "scripts/**" = ["T20", "S101"]
-"src/rig/audit/global.py" = ["N999"]  # "global" é palavra reservada; caminho canônico exigido (F3.3)
 
 # ─────────────────────────────────────────────────────────────
 # mypy
