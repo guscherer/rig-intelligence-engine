@@ -6,6 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from rig.graph.nodes.positioning import PositioningBrief
+
 
 class BudgetExceededError(Exception):
     def __init__(
@@ -167,7 +169,7 @@ class RIGState(BaseModel):
     proposition: str | None = None
     mandate: str | None = None
     triage: Any | None = None
-    position: Any | None = None
+    position: PositioningBrief | None = None
     draft: str | None = None
     audit: Any | None = None
     repair_cycle: int = 0

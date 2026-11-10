@@ -8,9 +8,11 @@ módulo de produção alcançando o harness de avaliação por caminho indireto.
 from __future__ import annotations
 
 import ast
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
-
-from importlinter.application.use_cases import lint_imports
 
 SRC = Path(__file__).resolve().parents[2] / "src" / "rig"
 
@@ -66,14 +68,42 @@ def test_core_has_no_internal_dependencies() -> None:
     assert not offenders, f"rig.core depende de camada superior: {offenders}"
 
 
-def test_graph_importing_api_fails_importlinter() -> None:
-    """Prova negativa: um import ``rig.graph -> rig.api`` reprovaria o gate."""
+def test_graph_importing_api_fails_importlinter(tmp_path: Path) -> None:
+    """Prova negativa: um import ``rig.graph -> rig.api`` reprovaria o gate.
+
+    Usa uma cópia descartável em ``tmp_path`` (com ``PYTHONPATH`` apontando
+    para a cópia) em vez de escrever dentro de ``src/``, evitando colisão em
+    execução paralela e sujeira na árvore se o processo morrer.
+    """
     project_root = Path(__file__).resolve().parents[2]
-    importlinter = project_root / ".importlinter"
-    offender = project_root / "src" / "rig" / "graph" / "_negtest_offender.py"
+    src_copy = tmp_path / "src"
+    shutil.copytree(project_root / "src", src_copy)
+    shutil.copy2(project_root / ".importlinter", tmp_path / ".importlinter")
+
+    offender = src_copy / "rig" / "graph" / "_negtest_offender.py"
     offender.write_text("from rig.api import routers  # noqa: F401\n", encoding="utf-8")
-    try:
-        ok = lint_imports(config_filename=str(importlinter), no_logo=True, cache_dir=None)
-    finally:
-        offender.unlink(missing_ok=True)
-    assert ok is False, "import-linter deveria reprovar rig.graph importando rig.api"
+
+    cache_dir = tmp_path / "cache"
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(src_copy) + os.pathsep + env.get("PYTHONPATH", "")
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+
+    config_path = tmp_path / ".importlinter"
+    code = (
+        "import importlinter.configuration; importlinter.configuration.configure(); "
+        "from importlinter.application.use_cases import lint_imports; "
+        "import sys; "
+        f"ok = lint_imports(config_filename={str(config_path)!r}, no_logo=True, "
+        f"cache_dir={str(cache_dir)!r}); "
+        "sys.exit(0 if ok else 1)"
+    )
+    result = subprocess.run(  # noqa: S603
+        [sys.executable, "-c", code],
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    combined = result.stdout + result.stderr
+    assert result.returncode != 0, combined
+    assert "broken" in combined.lower(), combined
