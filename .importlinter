@@ -84,3 +84,7 @@ layers =
     rig.graph
     rig.adapters | rig.retrieval | rig.audit
     rig.core
+# rig.graph.citations é folha pura (sem dep de rig): audit a reusa na regra 4
+# (frase factual sem citação), sem criar ciclo — a exceção é pontual e documentada.
+ignore_imports =
+    rig.audit.* -> rig.graph.citations
