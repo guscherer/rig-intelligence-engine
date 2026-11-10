@@ -34,6 +34,8 @@ Formato curto: contexto → decisão → consequência → o que foi rejeitado. 
 
 ## ADR-003 — Híbrido com RRF + cross-encoder local
 
+**Status.** Aceito com emenda (2026-11-07): default de produção alterado para `dense`; híbrido permanece disponível como modo `rrf`/`rrf+rerank`. Ver "Histórico de decisão" abaixo e F-012 em `docs/08-failures.md`.
+
 **Contexto.** Texto legal tem dois regimes: termo exato ("Art. 5º, II", "ICMS") e semântica ("oneração da cadeia"). Nenhum dos dois cobre sozinho.
 
 **Decisão.** Dense + sparse fundidos por Reciprocal Rank Fusion (k=60) e rerank com `bge-reranker-v2-m3` em CPU.
@@ -43,6 +45,39 @@ Formato curto: contexto → decisão → consequência → o que foi rejeitado. 
 **Consequência.** ~200 ms de CPU por consulta. Se a máquina do avaliador for fraca, o compose tem perfil `lite` que desliga o rerank. A tabela comparativa em F1 mostra o ganho real; se não houver ganho, o rerank sai.
 
 **Emenda (F1.6a, 2026-11-07).** O benchmark F1.5 (n=40) mostrou empate estatístico entre dense (0.950, IC95 [0.875, 1.000]) e rrf (0.925, IC95 [0.825, 1.000]) — diferença de uma consulta, intervalos sobrepostos. O híbrido não supera o denso de forma estatisticamente relevante (e a afirmação recíproca também seria verdadeira). Default alterado para `dense`, com justificativa operacional, não estatística: o encode da consulta já está no caminho (medido em ~200 ms p95 por consulta, modelo carregado; ver docs/eval-retrieval.md e eval/results/recall_v1.json, F1.6d), e eliminar BM25+RRF reduz superfície de manutenção e latência de operação. ADR-003 mantém a decisão arquitetural (híbrido disponível como modo `rrf`/`rrf+rerank`), mas o default de produção passa a ser `dense`.
+
+**Histórico de decisão.**
+
+- decidido "Dense + sparse fundidos por RRF (k=60) e rerank com `bge-reranker-v2-m3` em CPU" em 2026-11-07 (ADR-003 original, commit `1250c51`, F1) → medido dense 0.950 (IC95 [0.875, 1.000], 38/40 hits) vs. rrf 0.925 (IC95 [0.825, 1.000], 37/40 hits) em 2026-11-07 (`eval/results/recall_v1.json`, `docs/eval-retrieval.md`; n=40, bootstrap B=2000, seed=42) → alterado para default `dense` porque empate estatístico (intervalos sobrepostos) + justificativa operacional (encode já no caminho, ~200 ms p95 por consulta).
+- rerank (`rrf+rerank`): not_measured — inviável neste host por OOM (~3,3 GB, `DefaultCPUAllocator: not enough memory: tried to allocate 3288929408 bytes`) e >10 min/consulta em CPU; registrado em `docs/08-failures.md` (F-012, 2026-11-07). Latência do rerank: not_measured (sem medição concluída; ver F-012 "Residual": reavaliar em host com GPU ou modelo menor).
+- default do CLI alterado para `dense` em 2026-11-08 (commit `4cfa480`, F1.7a): `scripts/search.py` passou a `--mode dense`.
+
+**O que o código faz hoje.** O default de busca é `dense` em ambas as superfícies:
+- `scripts/search.py:19` — `default="dense"` no argumento `--mode`;
+- `src/rig/retrieval/search.py:313` — `mode: str = "dense"` em `run_search` (ponto de entrada do CLI). O pipeline genérico `search` (linha 253) mantém default interno `rrf`, selecionável.
+
+Trechos verbatim (`grep -n "mode" scripts/search.py src/rig/retrieval/search.py`):
+```
+scripts/search.py:17:        "--mode",
+scripts/search.py:51:    mode = args.mode
+scripts/search.py:52:    if args.no_rerank and mode in {"rrf+rerank", "rerank"}:
+scripts/search.py:53:        mode = "rrf"
+scripts/search.py:56:        run_search(query, mode=mode, filters=filt, limit=args.limit, candidate_k=args.candidate_k)
+src/rig/retrieval/search.py:212:def load_reranker(model: str | None = None) -> Any:
+src/rig/retrieval/search.py:249:async def search(  # noqa: PLR0913 - pipeline de busca aceita parametros opcionais (mode, filters, limit, candidate_k, encoder, query_vector, reranker, rerank)
+src/rig/retrieval/search.py:253:    mode: str = "rrf",
+src/rig/retrieval/search.py:264:    do_rerank = rerank if rerank is not None else (mode in {"rrf+rerank", "rerank"})
+src/rig/retrieval/search.py:265:    modes_dense = {"dense", "rrf", "rrf+rerank", "rerank"}
+src/rig/retrieval/search.py:266:    modes_sparse = {"sparse", "rrf", "rrf+rerank", "rerank"}
+src/rig/retrieval/search.py:271:    if mode in modes_dense:
+src/rig/retrieval/search.py:280:    if mode in modes_sparse:
+src/rig/retrieval/search.py:283:    if mode == "dense":
+src/rig/retrieval/search.py:285:    elif mode == "sparse":
+src/rig/retrieval/search.py:313:    mode: str = "dense",
+src/rig/retrieval/search.py:324:            mode=mode,
+```
+
+**Referência.** Inviabilidade do rerank: F-012 em `docs/08-failures.md` (seção na linha 24). ADR-003 não afirma mais que híbrido+rerank é a decisão vigente: o default de produção é `dense`; o híbrido permanece disponível como modo opcional (`rrf`, `rrf+rerank`), sujeito à reavaliação do rerank em host adequado.
 
 ---
 
