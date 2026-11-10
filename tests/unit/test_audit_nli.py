@@ -45,6 +45,7 @@ class _FakeGenerator:
         system: str | None = None,
         model: str | None = None,
         effort: str | None = None,
+        thinking: str | None = None,
     ) -> Generation:
         self.calls.append(
             {
@@ -55,6 +56,7 @@ class _FakeGenerator:
                 "system": system,
                 "model": model,
                 "effort": effort,
+                "thinking": thinking,
             }
         )
         return Generation(
@@ -158,6 +160,18 @@ async def test_payload_has_temperature_zero_and_deepseek_flash() -> None:
     assert call["temperature"] == 0.0
     assert call["model"] == "deepseek-flash"
     assert call["json_mode"] is True
+
+
+@pytest.mark.asyncio
+async def test_payload_limits_reasoning_for_classification() -> None:
+    """NLI é classificação (§9): raciocínio desligado e teto dimensionado."""
+    fake = _FakeGenerator(_ok_json("SUPPORTED"))
+    judge = DeepSeekNliJudge(fake)
+    await judge.judge(SENTENCE, SPAN, 1)
+    call = fake.calls[0]
+    assert call["thinking"] == "disabled"
+    assert call["effort"] == "low"
+    assert call["max_tokens"] == 512
 
 
 @pytest.mark.asyncio

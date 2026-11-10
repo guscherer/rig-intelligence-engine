@@ -8,11 +8,30 @@ não depende da stack de embedding nem do FTS.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from rig.retrieval.search import SearchResult
 
 SOURCE = "camara"
+
+
+def _parse_doc_meta(meta: Any) -> dict[str, Any]:
+    """Normaliza ``doc_meta`` (coluna ``jsonb``) em ``dict``.
+
+    O asyncpg devolve ``jsonb`` como ``str``, não ``dict``; aceita ambos e
+    devolve ``{}`` para ``None``/vazio/ilegível (mesmo contrato de
+    :func:`rig.retrieval.search._row_to_result`).
+    """
+    if isinstance(meta, str):
+        try:
+            parsed = json.loads(meta)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
+    if isinstance(meta, dict):
+        return meta
+    return {}
 
 
 def _row_to_search_result(row: Any) -> SearchResult:
@@ -24,7 +43,7 @@ def _row_to_search_result(row: Any) -> SearchResult:
         score=0.0,
         text=str(row["chunk_text"]),
         source=str(row.get("source") or SOURCE),
-        doc_meta=(dict(row["doc_meta"]) if isinstance(row["doc_meta"], dict) else {}),
+        doc_meta=_parse_doc_meta(row["doc_meta"]),
     )
 
 
@@ -46,8 +65,7 @@ async def fetch_document(
         )
     if row is None:
         return None
-    meta = row["doc_meta"]
-    return dict(meta) if isinstance(meta, dict) else {}
+    return _parse_doc_meta(row["doc_meta"])
 
 
 async def fetch_doc_chunks(

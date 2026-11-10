@@ -49,6 +49,7 @@ class FakeGenerator:
         system: str | None = None,
         model: str | None = None,
         effort: str | None = None,
+        thinking: str | None = None,
     ) -> Generation:
         used = model or "deepseek-flash"
         if "Classifique" in prompt:
@@ -184,6 +185,7 @@ async def test_run_pipeline_repairs_uncited_draft(tmp_path: Path) -> None:
             system: str | None = None,
             model: str | None = None,
             effort: str | None = None,
+            thinking: str | None = None,
         ) -> Generation:
             used = model or "deepseek-flash"
             if "Classifique" in prompt:
@@ -253,6 +255,7 @@ async def test_run_pipeline_wires_positioning_into_draft_prompt_and_retrieve_doc
             system: str | None = None,
             model: str | None = None,
             effort: str | None = None,
+            thinking: str | None = None,
         ) -> Generation:
             prompts = captured["prompts"]
             assert isinstance(prompts, list)
@@ -265,6 +268,7 @@ async def test_run_pipeline_wires_positioning_into_draft_prompt_and_retrieve_doc
                 system=system,
                 model=model,
                 effort=effort,
+                thinking=thinking,
             )
 
     monkeypatch.setattr(runner, "retrieve", fake_retrieve)

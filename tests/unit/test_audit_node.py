@@ -147,6 +147,7 @@ class _LoopGenerator:
         system: str | None = None,
         model: str | None = None,
         effort: str | None = None,
+        thinking: str | None = None,
     ) -> Generation:
         used = model or "deepseek-flash"
         if "Classifique" in prompt:

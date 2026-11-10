@@ -61,6 +61,7 @@ class _NodeLLM:
     temperature: float
     max_tokens: int
     effort: str | None = None
+    thinking: str | None = None
 
 
 class TokenCounts(BaseModel):
@@ -97,6 +98,8 @@ class RunReport(BaseModel):
     pricing: dict[str, float]
     evidence_spans: list[CitationSpan] = Field(default_factory=list)
     audit: AuditReport | None = None
+    # Tempo de parede por nó (segundos), acumulado entre ciclos de reparo.
+    node_times: dict[str, float] = Field(default_factory=dict)
 
 
 @dataclass
@@ -130,6 +133,7 @@ def _node_generator(
             max_tokens=llm.max_tokens,
             model=llm.model,
             effort=llm.effort,
+            thinking=llm.thinking,
         )
         budget.record_usage(
             generation.usage.model_dump(),
@@ -173,6 +177,7 @@ class _BudgetedGenerator:
         system: str | None = None,
         model: str | None = None,
         effort: str | None = None,
+        thinking: str | None = None,
     ) -> Generation:
         generation = await self._generator.generate(
             prompt,
@@ -182,6 +187,7 @@ class _BudgetedGenerator:
             system=system,
             model=model,
             effort=effort,
+            thinking=thinking,
         )
         self._budget.record_usage(
             generation.usage.model_dump(),
@@ -233,7 +239,12 @@ async def _await_if_needed(value: Any) -> Any:
     return value
 
 
-async def _draft_with_repair(
+def _record_node_time(node_times: dict[str, float], name: str, started: float) -> None:
+    """Acumula o tempo de parede do nó ``name`` (segundos) no mapa do run."""
+    node_times[name] = node_times.get(name, 0.0) + (time.monotonic() - started)
+
+
+async def _draft_with_repair(  # noqa: PLR0913
     *,
     generator: StructuredGenerator,
     budget: BudgetState,
@@ -243,6 +254,7 @@ async def _draft_with_repair(
     ementa: str,
     position_brief: Any,
     revision_notes: Sequence[str] = (),
+    node_times: dict[str, float],
 ) -> DraftResult:
     draft_gen = _node_generator(
         generator,
@@ -262,6 +274,7 @@ async def _draft_with_repair(
     draft_result: DraftResult | None = None
     for attempt in range(2):
         try:
+            started = time.monotonic()
             draft_result = await draft(
                 positioning=position_brief,
                 chunks=chunks,
@@ -269,6 +282,7 @@ async def _draft_with_repair(
                 proposition=ementa,
                 revision_notes=notes,
             )
+            _record_node_time(node_times, "draft", started)
             break
         except CitationError as exc:
             if attempt == 0:
@@ -280,7 +294,7 @@ async def _draft_with_repair(
     return draft_result
 
 
-async def _audit_and_repair(
+async def _audit_and_repair(  # noqa: PLR0913
     *,
     draft_result: DraftResult,
     chunks: list[Any],
@@ -290,6 +304,7 @@ async def _audit_and_repair(
     generator: StructuredGenerator,
     modelos: dict[str, str],
     settings: Settings,
+    node_times: dict[str, float],
 ) -> tuple[DraftResult, AuditReport]:
     """Aresta ``draft -> audit`` (docs/03 §6.4): repara até 2 ciclos e então emite.
 
@@ -300,6 +315,7 @@ async def _audit_and_repair(
     """
     first_report: AuditReport | None = None
     while True:
+        started = time.monotonic()
         report = await audit(
             draft_text=draft_result.markdown,
             chunks=chunks,
@@ -308,6 +324,7 @@ async def _audit_and_repair(
             repair_cycle=state.repair_cycle,
             budget=state.budget,
         )
+        _record_node_time(node_times, "audit", started)
         if first_report is None:
             first_report = report
         state.audit = report
@@ -325,6 +342,7 @@ async def _audit_and_repair(
             ementa=state.proposition or "",
             position_brief=state.position,
             revision_notes=state.revision_notes,
+            node_times=node_times,
         )
         state.draft = draft_result.markdown
         state.budget.check()
@@ -333,7 +351,7 @@ async def _audit_and_repair(
     return draft_result, report
 
 
-async def _run_relevant_path(
+async def _run_relevant_path(  # noqa: PLR0913
     *,
     ementa: str,
     doc_id: str,
@@ -343,7 +361,9 @@ async def _run_relevant_path(
     modelos: dict[str, str],
     settings: Settings,
     state: RIGState,
+    node_times: dict[str, float],
 ) -> tuple[list[Any], DraftResult]:
+    started = time.monotonic()
     retrieved = await _await_if_needed(
         retrieve(
             query=ementa,
@@ -352,6 +372,7 @@ async def _run_relevant_path(
             search=lambda q, filters=None: load_chunks(doc_id),  # noqa: ARG005
         )
     )
+    _record_node_time(node_times, "retrieve", started)
     retrieved_list = list(retrieved) if retrieved is not None else []
     state.retrieved = _to_state_chunks(retrieved_list)
 
@@ -366,9 +387,11 @@ async def _run_relevant_path(
         for c in retrieved_list
         if (c.get("kind") if isinstance(c, dict) else getattr(c, "kind", None)) == "institucional"
     ]
+    started = time.monotonic()
     position_brief = await _await_if_needed(
         positioning(corpus=institutional_chunks if institutional_chunks else None)
     )
+    _record_node_time(node_times, "positioning", started)
     state.position = position_brief
 
     budget.check()
@@ -380,6 +403,7 @@ async def _run_relevant_path(
         chunks=chunks,
         ementa=ementa,
         position_brief=position_brief,
+        node_times=node_times,
     )
     state.draft = draft_result.markdown
     budget.check()
@@ -434,6 +458,7 @@ async def run_pipeline(
     partial_reason: str | None = None
     evidence_spans: list[CitationSpan] = []
     audit_report: AuditReport | None = None
+    node_times: dict[str, float] = {}
 
     try:
         meta = await load_document(doc_id)
@@ -456,7 +481,9 @@ async def run_pipeline(
                 max_tokens=TRIAGE_MAX_TOKENS,
             ),
         )
+        started_node = time.monotonic()
         triage_result = await triage(ementa=ementa, keywords=keywords, generator=triage_gen)
+        _record_node_time(node_times, "triage", started_node)
         budget.check()
 
         # Estado tipado do grafo (RIGState): instanciado e preenchido para auditoria.
@@ -479,6 +506,7 @@ async def run_pipeline(
                 modelos=modelos,
                 settings=settings,
                 state=state,
+                node_times=node_times,
             )
             draft_result, audit_report = await _audit_and_repair(
                 draft_result=draft_result,
@@ -489,6 +517,7 @@ async def run_pipeline(
                 generator=generator,
                 modelos=modelos,
                 settings=settings,
+                node_times=node_times,
             )
             markdown = draft_result.markdown
             evidence_spans = draft_result.evidence_spans
@@ -524,6 +553,7 @@ async def run_pipeline(
         },
         evidence_spans=evidence_spans,
         audit=audit_report,
+        node_times={k: round(v, 3) for k, v in node_times.items()},
     )
     _write_reports(reports_dir, run_id, markdown, report, partial)
     return RunOutcome(report=report, markdown=markdown, partial=partial)

@@ -24,8 +24,13 @@ from rig.audit.models import Usage
 # deepseek-flash: modelo barato de classificação (docs/03 §7 — "audit | Flash").
 MODEL = "deepseek-flash"
 TEMPERATURE = 0.0
-# ~120 tokens de saída por sentença (§7); folga para o modo de raciocínio.
-MAX_TOKENS = 1024
+# NLI é classificação, não redação (§9): o juiz desliga o raciocínio (thinking
+# mode) — que por padrão consumia o orçamento e devolvia ``content`` vazio
+# (NliJudgeError no char 0) — e dimensiona o teto para a saída real: veredito +
+# justificativa ≤200 chars + needed_fix.
+EFFORT = "low"
+THINKING = "disabled"
+MAX_TOKENS = 512
 MAX_JUSTIFICATION_CHARS = 200
 
 
@@ -77,6 +82,8 @@ class _Generator(Protocol):
         temperature: float = 0.0,
         max_tokens: int = 4096,
         model: str | None = None,
+        effort: str | None = None,
+        thinking: str | None = None,
     ) -> Any: ...
 
 
@@ -152,12 +159,16 @@ class DeepSeekNliJudge:
         *,
         model: str = MODEL,
         max_tokens: int = MAX_TOKENS,
+        effort: str | None = EFFORT,
+        thinking: str | None = THINKING,
         input_cost_per_token: float = 0.0,
         output_cost_per_token: float = 0.0,
     ) -> None:
         self._generator = generator
         self._model = model
         self._max_tokens = max_tokens
+        self._effort = effort
+        self._thinking = thinking
         self._input_cost_per_token = input_cost_per_token
         self._output_cost_per_token = output_cost_per_token
         self._total_usage = Usage()
@@ -183,6 +194,8 @@ class DeepSeekNliJudge:
             temperature=TEMPERATURE,
             max_tokens=self._max_tokens,
             model=self._model,
+            effort=self._effort,
+            thinking=self._thinking,
         )
         data = _parse_generation_content(generation.content)
         verdict = _parse_verdict(data.get("verdict"))
@@ -206,10 +219,12 @@ class DeepSeekNliJudge:
 
 
 __all__ = [
+    "EFFORT",
     "MAX_JUSTIFICATION_CHARS",
     "MAX_TOKENS",
     "MODEL",
     "TEMPERATURE",
+    "THINKING",
     "DeepSeekNliJudge",
     "NliJudge",
     "NliJudgeError",

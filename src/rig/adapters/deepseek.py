@@ -66,6 +66,7 @@ class StructuredGenerator(Protocol):
         system: str | None = None,
         model: str | None = None,
         effort: str | None = None,
+        thinking: str | None = None,
     ) -> Generation: ...
 
 
@@ -119,13 +120,17 @@ class DeepSeekGenerator:
         system: str | None = None,
         model: str | None = None,
         effort: str | None = None,
+        thinking: str | None = None,
     ) -> Generation:
         """Chama ``/chat/completions`` e devolve ``Generation`` com ``Usage`` real.
 
         Em ``json_mode``, força ``response_format=json_object`` e pede JSON ao
         modelo via system prompt (DeepSeek exige o termo "json" no prompt).
         ``model`` sobrescreve o modelo padrão da instância (config por nó, ADR-012);
-        ``effort`` (``low``/``high``/``max``) limita o modo de raciocínio.
+        ``effort`` (``low``/``high``/``max``) limita o raciocínio via
+        ``reasoning_effort``; ``thinking`` (``enabled``/``disabled``) liga/desliga
+        o modo de raciocínio (chain-of-thought) — ``disabled`` zera os
+        ``reasoning_tokens`` e devolve só o ``content``.
         """
         messages: list[dict[str, str]] = []
         if system:
@@ -149,7 +154,9 @@ class DeepSeekGenerator:
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
         if effort is not None:
-            payload["effort"] = effort
+            payload["reasoning_effort"] = effort
+        if thinking is not None:
+            payload["thinking"] = {"type": thinking}
 
         try:
             response = await self._client.post("/chat/completions", json=payload)
