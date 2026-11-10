@@ -167,7 +167,7 @@ class RIGState(BaseModel):
     proposition: str | None = None
     mandate: str | None = None
     triage: Any | None = None
-    position: str | None = None
+    position: Any | None = None
     draft: str | None = None
     audit: str | None = None
     repair_cycle: int = 0
