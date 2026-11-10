@@ -5,6 +5,13 @@ Interface publica deste pacote: exportar aqui, nunca importar de submodulo
 """
 
 from rig.audit.models import Finding, RuleCode, Severity
+from rig.audit.nli import (
+    DeepSeekNliJudge,
+    NliJudge,
+    NliJudgeError,
+    SentenceVerdict,
+    Verdict,
+)
 from rig.audit.rules import (
     FORBIDDEN_PHRASES,
     forbidden_language,
@@ -18,9 +25,14 @@ from rig.audit.rules import (
 
 __all__ = [
     "FORBIDDEN_PHRASES",
+    "DeepSeekNliJudge",
     "Finding",
+    "NliJudge",
+    "NliJudgeError",
     "RuleCode",
+    "SentenceVerdict",
     "Severity",
+    "Verdict",
     "forbidden_language",
     "hard_rules",
     "missing_articles",
