@@ -15,7 +15,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from rig.graph.citations import (
+from rig.core.citations import (
     CitationSpan,
     chunk_id,
     chunk_text,

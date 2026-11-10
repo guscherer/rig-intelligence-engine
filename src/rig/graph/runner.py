@@ -31,8 +31,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from rig.adapters import Generation, StructuredGenerator
 from rig.audit import AuditReport, Decision, DeepSeekNliJudge, NliJudge, SectionTemplate
+from rig.core.citations import CitationError, CitationSpan
 from rig.core.config import Settings, get_settings
-from rig.graph.citations import CitationError, CitationSpan
 from rig.graph.nodes.audit import DEFAULT_TEMPLATE, audit
 from rig.graph.nodes.draft import DraftResult, draft
 from rig.graph.nodes.positioning import positioning
@@ -92,7 +92,7 @@ class RunReport(BaseModel):
     budget: BudgetInfo
     duration_s: float
     modelos: dict[str, str]
-    status: Literal["ok", "partial"]
+    status: Literal["ok", "partial", "blocked"]
     partial_reason: str | None = None
     pricing: dict[str, float]
     evidence_spans: list[CitationSpan] = Field(default_factory=list)
@@ -478,7 +478,10 @@ async def run_pipeline(
             evidence_spans = draft_result.evidence_spans
 
         if partial_reason is None:
-            state.status = "ok"
+            if audit_report is not None and audit_report.decision == Decision.BLOCKED:
+                state.status = "blocked"
+            else:
+                state.status = "ok"
         state.cost_usd = budget.spent_usd
     except BudgetExceededError as exc:
         partial_reason = str(exc)
@@ -499,7 +502,13 @@ async def run_pipeline(
         budget=BudgetInfo(max_cost_usd=budget.max_cost_usd, deadline_s=budget.deadline_s),
         duration_s=round(duration, 3),
         modelos=modelos,
-        status="partial" if partial else "ok",
+        status=(
+            "partial"
+            if partial
+            else "blocked"
+            if (audit_report is not None and audit_report.decision == Decision.BLOCKED)
+            else "ok"
+        ),
         partial_reason=partial_reason,
         pricing={
             "input_cost_per_token": settings.input_cost_per_token,

@@ -19,7 +19,7 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict
 
-from rig.adapters import StructuredGenerator, Usage
+from rig.audit.models import Usage
 
 # deepseek-flash: modelo barato de classificação (docs/03 §7 — "audit | Flash").
 MODEL = "deepseek-flash"
@@ -128,7 +128,7 @@ class DeepSeekNliJudge:
 
     def __init__(
         self,
-        generator: StructuredGenerator,
+        generator: Any,
         *,
         model: str = MODEL,
         max_tokens: int = MAX_TOKENS,
@@ -177,7 +177,7 @@ class DeepSeekNliJudge:
             needed_fix=needed_fix,
         )
 
-    def _accumulate(self, usage: Usage) -> None:
+    def _accumulate(self, usage: Any) -> None:
         self._total_usage = self._total_usage + usage
         self._total_cost_usd += (
             usage.prompt_tokens * self._input_cost_per_token

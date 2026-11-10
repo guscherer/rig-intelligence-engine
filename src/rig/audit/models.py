@@ -48,3 +48,25 @@ class Finding(BaseModel):
     detail: str
     chunk_id: str | None
     severity: Severity
+
+
+class Usage(BaseModel):
+    """Tokens consumidos em uma chamada (prompt, completion, reasoning).
+
+    Espelho estrutural de ``rig.adapters.Usage`` — ``rig.audit`` não pode
+    importar ``rig.adapters`` (fronteira, docs/10 §1), então declara o mesmo
+    contrato aqui. Mantém ``__add__`` para acumulação em ``DeepSeekNliJudge``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    reasoning_tokens: int = 0
+
+    def __add__(self, other: Usage) -> Usage:
+        return Usage(
+            prompt_tokens=self.prompt_tokens + getattr(other, "prompt_tokens", 0),
+            completion_tokens=self.completion_tokens + getattr(other, "completion_tokens", 0),
+            reasoning_tokens=self.reasoning_tokens + getattr(other, "reasoning_tokens", 0),
+        )

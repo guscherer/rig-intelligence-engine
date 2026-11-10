@@ -98,7 +98,7 @@ async def test_run_pipeline_emits_minuta_and_run_json(tmp_path: Path) -> None:
     )
     assert outcome.partial is False
     report = outcome.report
-    assert report.status == "ok"
+    assert report.status == "blocked"
     assert report.cost_usd > 0
     assert report.tokens.prompt > 0
     assert report.tokens.completion > 0
@@ -116,7 +116,7 @@ async def test_run_pipeline_emits_minuta_and_run_json(tmp_path: Path) -> None:
     data = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
     assert data["run_id"] == report.run_id
     assert data["doc_id"] == "d1"
-    assert data["status"] == "ok"
+    assert data["status"] == "blocked"
     assert set(data["tokens"]) == {"prompt", "completion", "reasoning"}
     assert set(data["budget"]) == {"max_cost_usd", "deadline_s"}
     # aritmética do custo fecha com os tokens (requisito de auditoria do F2.5)
@@ -219,7 +219,7 @@ async def test_run_pipeline_repairs_uncited_draft(tmp_path: Path) -> None:
         reports_dir=tmp_path,
     )
     assert outcome.partial is False
-    assert outcome.report.status == "ok"
+    assert outcome.report.status == "blocked"
     assert "[C1]" in outcome.markdown
 
 

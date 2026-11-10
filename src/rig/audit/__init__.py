@@ -13,7 +13,7 @@ from rig.audit.global_checks import (
     uncited_quantities,
     unsupported_promises,
 )
-from rig.audit.models import Finding, RuleCode, Severity
+from rig.audit.models import Finding, RuleCode, Severity, Usage
 from rig.audit.nli import (
     DeepSeekNliJudge,
     NliJudge,
@@ -46,6 +46,7 @@ __all__ = [
     "SectionTemplate",
     "SentenceVerdict",
     "Severity",
+    "Usage",
     "Verdict",
     "decide",
     "empty_sections",

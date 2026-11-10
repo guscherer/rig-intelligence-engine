@@ -190,6 +190,7 @@ async def test_never_repairs_blocks_at_cycle2_with_phrases(tmp_path: Path) -> No
     report = outcome.report.audit
     assert report is not None
     assert report.decision == Decision.BLOCKED
+    assert outcome.report.status == "blocked"
     assert report.repair_cycle == 2
     assert gen.draft_calls == 3  # 1 inicial + 2 reparos, então bloqueia
     # As frases UNSUPPORTED estão listadas no relatório.
@@ -220,6 +221,7 @@ async def test_contradicted_blocks_without_any_repair(tmp_path: Path) -> None:
     report = outcome.report.audit
     assert report is not None
     assert report.decision == Decision.BLOCKED
+    assert outcome.report.status == "blocked"
     assert report.repair_cycle == 0
     assert gen.draft_calls == 1  # nenhum reparo
 
@@ -241,5 +243,9 @@ async def test_emit_receives_audit_report_on_every_path(tmp_path: Path) -> None:
         data = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
         assert data["audit"] is not None
         assert data["audit"]["decision"] in {"PASS", "BLOCKED"}
+        if data["audit"]["decision"] == "BLOCKED":
+            assert data["status"] == "blocked"
+        else:
+            assert data["status"] == "ok"
         assert "unsupported_rate_before" in data["audit"]
         assert "unsupported_rate_after" in data["audit"]

@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from rig.audit.models import Finding, RuleCode, Severity
-from rig.graph.citations import chunk_text
+from rig.core.citations import chunk_text
 
 # Mínimo de caracteres alfanuméricos para uma seção não ser considerada vazia.
 # Abaixo disso é placeholder ou corpo sem substância (docs/03 §6.3, checagem 4).

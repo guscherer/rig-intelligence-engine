@@ -16,7 +16,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from rig.audit.models import Finding, RuleCode, Severity
-from rig.graph.citations import chunk_id, chunk_text, find_uncited_sentences
+from rig.core.citations import chunk_id, chunk_text, find_uncited_sentences
 
 # ── Regra 1: citação órfã ────────────────────────────────────────────────────
 # [C<n>] é 1-based (mesma convenção de FONTES no prompt e de rig.graph.citations).

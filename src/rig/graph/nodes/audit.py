@@ -30,7 +30,7 @@ from rig.audit import (
     hard_rules,
     unsupported_rate,
 )
-from rig.graph.citations import chunk_text, iter_cited_sentences
+from rig.core.citations import chunk_text, iter_cited_sentences
 from rig.graph.state import BudgetExceededError, BudgetState
 
 # Motivo registrado em ``needed_fixes`` quando o orçamento estoura no meio do NLI.
