@@ -297,12 +297,35 @@ def _extract_numbers(text: str) -> set[str]:
 
 
 def number_mismatches(draft: str, chunks: Sequence[Any]) -> list[Finding]:
-    """Número/data afirmado no draft que não consta (normalizado) nas fontes."""
+    """Número/data afirmado no draft que não consta (normalizado) nas fontes.
+
+    Cada finding aponta a sentença onde o número/data aparece (nunca "o
+    documento" genérico), para permitir reparo cirúrgico. A ordenação dos
+    findings segue a ordenação lexicográfica dos tokens normalizados, como
+    antes; apenas a localização (sentence_index) foi acrescentada.
+    """
     source = "\n".join(_chunk_text(c) for c in chunks)
     draft_numbers = _extract_numbers(draft)
     source_numbers = _extract_numbers(source)
     draft_dates = {m.group(0) for m in _DATE_RE.finditer(draft)}
     source_dates = {m.group(0) for m in _DATE_RE.finditer(source)}
+
+    # Posição da primeira ocorrência de cada token normalizado (para sentence_index).
+    date_spans = [(m.start(), m.end()) for m in _DATE_RE.finditer(draft)]
+
+    def _first_number_pos(normalized: str) -> int:
+        for match in _NUMBER_RE.finditer(draft):
+            if any(s <= match.start() < e for s, e in date_spans):
+                continue
+            if _normalize_number(match.group(0)) == normalized:
+                return match.start()
+        return 0
+
+    def _first_date_pos(token: str) -> int:
+        for match in _DATE_RE.finditer(draft):
+            if match.group(0) == token:
+                return match.start()
+        return 0
 
     findings: list[Finding] = []
     for token in sorted(draft_numbers - source_numbers):
@@ -310,7 +333,7 @@ def number_mismatches(draft: str, chunks: Sequence[Any]) -> list[Finding]:
             Finding(
                 code=FindingCode.NUMBER_MISMATCH,
                 severity=Severity.BLOCKING,
-                sentence_index=0,
+                sentence_index=_sentence_index_at(draft, _first_number_pos(token)),
                 detail=f"número {token!r} não consta nas fontes",
                 needed_fix=f"corrigir o número {token!r} conforme as fontes",
             )
@@ -320,7 +343,7 @@ def number_mismatches(draft: str, chunks: Sequence[Any]) -> list[Finding]:
             Finding(
                 code=FindingCode.NUMBER_MISMATCH,
                 severity=Severity.BLOCKING,
-                sentence_index=0,
+                sentence_index=_sentence_index_at(draft, _first_date_pos(token)),
                 detail=f"data {token!r} não consta nas fontes",
                 needed_fix=f"corrigir a data {token!r} conforme as fontes",
             )
