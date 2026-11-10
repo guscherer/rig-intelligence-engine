@@ -3,7 +3,7 @@
 PY := uv run
 SRC := src
 
-.PHONY: help install check lint format type arch test test-live size clean up down ingest ingest-smoke ingest-full embed search eval-retrieval run
+.PHONY: help install check lint format type arch test test-live size clean up down ingest ingest-smoke ingest-full embed search eval-retrieval eval run
 
 help:
 > @echo "install  - cria venv e instala deps (dev)"
@@ -66,6 +66,9 @@ run:
 
 eval-retrieval:
 > $(PY) python scripts/eval_retrieval.py
+
+eval:
+> $(PY) python scripts/eval_report.py
 
 up:
 > docker compose up -d
