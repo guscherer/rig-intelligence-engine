@@ -30,6 +30,18 @@ def _imported_roots(path: Path) -> set[str]:
     return roots
 
 
+def _imported_modules(path: Path) -> set[str]:
+    """Caminhos de módulo completos importados (``import x.y`` e ``from x.y import ...``)."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    modules: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            modules.add(node.module)
+    return modules
+
+
 def _py_files(*excluded: str) -> list[Path]:
     return [
         p
@@ -66,6 +78,21 @@ def test_core_has_no_internal_dependencies() -> None:
         )
     ]
     assert not offenders, f"rig.core depende de camada superior: {offenders}"
+
+
+def test_state_does_not_import_graph_nodes() -> None:
+    """``rig.graph.state`` é a raiz do grafo: não pode importar ``rig.graph.nodes``.
+
+    Se importar, fecha o ciclo ``state -> nodes/__init__ -> nodes.audit -> state``
+    (F2.11): ``PositioningBrief`` mora em ``rig.core.types`` justamente para o
+    ``RIGState.position`` tipar sem depender dos nós.
+    """
+    state = SRC / "graph" / "state.py"
+    offenders = sorted(m for m in _imported_modules(state) if m.startswith("rig.graph.nodes"))
+    assert not offenders, (
+        "rig.graph.state importa rig.graph.nodes (ciclo F2.11): "
+        f"{offenders}. Tipos devem vir de rig.core.types."
+    )
 
 
 def test_graph_importing_api_fails_importlinter(tmp_path: Path) -> None:

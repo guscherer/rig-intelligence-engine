@@ -9,8 +9,8 @@ import pytest
 
 from rig.adapters import Generation, Usage
 from rig.core.config import Settings
+from rig.core.types import PositioningBrief
 from rig.graph import runner
-from rig.graph.nodes.positioning import PositioningBrief
 from rig.graph.runner import run_pipeline
 
 CHUNKS = [

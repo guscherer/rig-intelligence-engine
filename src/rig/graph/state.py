@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from rig.graph.nodes.positioning import PositioningBrief
+from rig.core.types import PositioningBrief
 
 
 class BudgetExceededError(Exception):

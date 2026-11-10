@@ -13,20 +13,10 @@ import inspect
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
 
 from rig.core.citations import chunk_id, chunk_text
-
-
-class PositioningBrief(BaseModel):
-    """Resultado tipado do nó ``positioning`` (docs/03 §4)."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    restricoes: list[str] = Field(default_factory=list)
-    escopo: str = ""
-    fonte_restricoes: list[str] = Field(default_factory=list)
-    insuficiente: bool = False
+from rig.core.types import PositioningBrief
 
 
 async def _call_generator(generator: Any, prompt: str) -> Any:
@@ -131,4 +121,4 @@ def positioning(
     return _positioning_impl(corpus, red_lines=red_lines, generator=generator, escopo=escopo)
 
 
-__all__ = ["PositioningBrief", "positioning"]
+__all__ = ["positioning"]

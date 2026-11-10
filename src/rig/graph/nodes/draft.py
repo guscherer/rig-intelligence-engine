@@ -22,7 +22,7 @@ from rig.core.citations import (
     normalize_evidence_spans,
     validate_draft,
 )
-from rig.graph.nodes.positioning import PositioningBrief
+from rig.core.types import PositioningBrief
 
 
 class DraftResult(BaseModel):

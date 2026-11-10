@@ -1,6 +1,6 @@
 from rig.graph.nodes.audit import DEFAULT_TEMPLATE, audit
 from rig.graph.nodes.draft import DraftError, DraftResult, draft
-from rig.graph.nodes.positioning import PositioningBrief, positioning
+from rig.graph.nodes.positioning import positioning
 from rig.graph.nodes.retrieve import (
     RetrievedChunk,
     RetrieveResult,
@@ -24,7 +24,6 @@ __all__ = [
     "DraftError",
     "DraftResult",
     "EvidenceSpan",
-    "PositioningBrief",
     "RetrieveResult",
     "RetrievedChunk",
     "TriageResult",
