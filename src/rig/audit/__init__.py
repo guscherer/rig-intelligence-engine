@@ -21,6 +21,7 @@ from rig.audit.nli import (
     SentenceVerdict,
     Verdict,
 )
+from rig.audit.policy import AuditReport, Decision, decide
 from rig.audit.rules import (
     FORBIDDEN_PHRASES,
     forbidden_language,
@@ -35,6 +36,8 @@ from rig.audit.rules import (
 __all__ = [
     "FORBIDDEN_PHRASES",
     "MIN_SECTION_CHARS",
+    "AuditReport",
+    "Decision",
     "DeepSeekNliJudge",
     "Finding",
     "NliJudge",
@@ -44,6 +47,7 @@ __all__ = [
     "SentenceVerdict",
     "Severity",
     "Verdict",
+    "decide",
     "empty_sections",
     "forbidden_language",
     "global_checks",

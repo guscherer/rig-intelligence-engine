@@ -22,7 +22,7 @@ import inspect
 import json
 import time
 import uuid
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -30,8 +30,10 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from rig.adapters import Generation, StructuredGenerator
+from rig.audit import AuditReport, Decision, DeepSeekNliJudge, NliJudge, SectionTemplate
 from rig.core.config import Settings, get_settings
 from rig.graph.citations import CitationError, CitationSpan
+from rig.graph.nodes.audit import DEFAULT_TEMPLATE, audit
 from rig.graph.nodes.draft import DraftResult, draft
 from rig.graph.nodes.positioning import positioning
 from rig.graph.nodes.retrieve import retrieve
@@ -94,6 +96,7 @@ class RunReport(BaseModel):
     partial_reason: str | None = None
     pricing: dict[str, float]
     evidence_spans: list[CitationSpan] = Field(default_factory=list)
+    audit: AuditReport | None = None
 
 
 @dataclass
@@ -139,6 +142,53 @@ def _node_generator(
         return generation.content
 
     return call
+
+
+class _BudgetedGenerator:
+    """Envolve o ``StructuredGenerator`` para contabilizar cada chamada no ``BudgetState``.
+
+    O juiz NLI (``DeepSeekNliJudge``) espera um ``StructuredGenerator``; este
+    adapter preserva a interface e, a cada ``generate``, registra o ``Usage``
+    real no orçamento (mesma contabilidade de :func:`_node_generator`), para que
+    estouro no meio da auditoria seja detectado chamada a chamada.
+    """
+
+    def __init__(
+        self,
+        generator: StructuredGenerator,
+        budget: BudgetState,
+        settings: Settings,
+    ) -> None:
+        self._generator = generator
+        self._budget = budget
+        self._settings = settings
+
+    async def generate(
+        self,
+        prompt: str,
+        *,
+        json_mode: bool = False,
+        temperature: float = 0.0,
+        max_tokens: int = 4096,
+        system: str | None = None,
+        model: str | None = None,
+        effort: str | None = None,
+    ) -> Generation:
+        generation = await self._generator.generate(
+            prompt,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            system=system,
+            model=model,
+            effort=effort,
+        )
+        self._budget.record_usage(
+            generation.usage.model_dump(),
+            input_cost_per_token=self._settings.input_cost_per_token,
+            output_cost_per_token=self._settings.output_cost_per_token,
+        )
+        return generation
 
 
 def _to_state_chunks(items: list[Any]) -> list[StateRetrievedChunk]:
@@ -192,6 +242,7 @@ async def _draft_with_repair(
     chunks: list[Any],
     ementa: str,
     position_brief: Any,
+    revision_notes: Sequence[str] = (),
 ) -> DraftResult:
     draft_gen = _node_generator(
         generator,
@@ -207,7 +258,7 @@ async def _draft_with_repair(
             effort="low",
         ),
     )
-    revision_notes: list[str] = []
+    notes = list(revision_notes)
     draft_result: DraftResult | None = None
     for attempt in range(2):
         try:
@@ -216,17 +267,63 @@ async def _draft_with_repair(
                 chunks=chunks,
                 generator=draft_gen,
                 proposition=ementa,
-                revision_notes=revision_notes,
+                revision_notes=notes,
             )
             break
         except CitationError as exc:
             if attempt == 0:
-                revision_notes = [str(exc)]
+                notes = [str(exc)]
                 continue
             raise
     if draft_result is None:
         raise RuntimeError("draft não produziu resultado")
     return draft_result
+
+
+async def _audit_and_repair(
+    *,
+    draft_result: DraftResult,
+    chunks: list[Any],
+    template: SectionTemplate,
+    judge: NliJudge,
+    state: RIGState,
+    generator: StructuredGenerator,
+    modelos: dict[str, str],
+    settings: Settings,
+) -> tuple[DraftResult, AuditReport]:
+    """Aresta ``draft -> audit`` (docs/03 §6.4): repara até 2 ciclos e então emite.
+
+    Devolve o ``DraftResult`` final e o relatório da última auditoria. A política
+    (:func:`rig.audit.policy.decide`) devolve ``BLOCKED`` no ciclo 2, então o
+    laço termina por construção.
+    """
+    while True:
+        report = await audit(
+            draft_text=draft_result.markdown,
+            chunks=chunks,
+            template=template,
+            judge=judge,
+            repair_cycle=state.repair_cycle,
+            budget=state.budget,
+        )
+        state.audit = report
+        if report.decision is not Decision.REPAIR or state.repair_cycle >= 2:
+            return draft_result, report
+        state.repair_cycle += 1
+        state.revision_notes = list(report.needed_fixes)
+        state.budget.check()
+        draft_result = await _draft_with_repair(
+            generator=generator,
+            budget=state.budget,
+            modelos=modelos,
+            settings=settings,
+            chunks=chunks,
+            ementa=state.proposition or "",
+            position_brief=state.position,
+            revision_notes=state.revision_notes,
+        )
+        state.draft = draft_result.markdown
+        state.budget.check()
 
 
 async def _run_relevant_path(
@@ -290,6 +387,8 @@ async def run_pipeline(
     load_chunks: ChunkLoader,
     settings: Settings | None = None,
     reports_dir: Path = Path("reports"),
+    judge: NliJudge | None = None,
+    audit_template: SectionTemplate | None = None,
 ) -> RunOutcome:
     """Executa o grafo e emite ``minuta.md`` + ``run.json`` em ``reports/<run_id>/``.
 
@@ -304,11 +403,14 @@ async def run_pipeline(
         deadline_s=settings.max_deadline_s,
     )
     modelos: dict[str, str] = {}
+    nli_judge: NliJudge = judge or DeepSeekNliJudge(_BudgetedGenerator(generator, budget, settings))
+    template = audit_template or DEFAULT_TEMPLATE
     started = time.monotonic()
 
     markdown = ""
     partial_reason: str | None = None
     evidence_spans: list[CitationSpan] = []
+    audit_report: AuditReport | None = None
 
     try:
         meta = await load_document(doc_id)
@@ -355,6 +457,16 @@ async def run_pipeline(
                 settings=settings,
                 state=state,
             )
+            draft_result, audit_report = await _audit_and_repair(
+                draft_result=draft_result,
+                chunks=_chunks,
+                template=template,
+                judge=nli_judge,
+                state=state,
+                generator=generator,
+                modelos=modelos,
+                settings=settings,
+            )
             markdown = draft_result.markdown
             evidence_spans = draft_result.evidence_spans
 
@@ -387,6 +499,7 @@ async def run_pipeline(
             "output_cost_per_token": settings.output_cost_per_token,
         },
         evidence_spans=evidence_spans,
+        audit=audit_report,
     )
     _write_reports(reports_dir, run_id, markdown, report, partial)
     return RunOutcome(report=report, markdown=markdown, partial=partial)

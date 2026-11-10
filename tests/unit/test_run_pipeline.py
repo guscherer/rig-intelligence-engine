@@ -55,6 +55,14 @@ class FakeGenerator:
                 model=used,
                 usage=Usage(prompt_tokens=100, completion_tokens=20, reasoning_tokens=5),
             )
+        if "Avalie se o TRECHO sustenta" in prompt:
+            return Generation(
+                content=json.dumps(
+                    {"verdict": "SUPPORTED", "justification": "ok", "needed_fix": None}
+                ),
+                model=used,
+                usage=Usage(prompt_tokens=10, completion_tokens=5, reasoning_tokens=0),
+            )
         return Generation(
             content=json.dumps({"markdown": DRAFT_MD, "evidence_spans": SPANS}),
             model=used,
@@ -181,6 +189,14 @@ async def test_run_pipeline_repairs_uncited_draft(tmp_path: Path) -> None:
                     ),
                     model=used,
                     usage=Usage(prompt_tokens=100, completion_tokens=20, reasoning_tokens=5),
+                )
+            if "Avalie se o TRECHO sustenta" in prompt:
+                return Generation(
+                    content=json.dumps(
+                        {"verdict": "SUPPORTED", "justification": "ok", "needed_fix": None}
+                    ),
+                    model=used,
+                    usage=Usage(prompt_tokens=10, completion_tokens=5, reasoning_tokens=0),
                 )
             if "Correções" in prompt:
                 content = json.dumps({"markdown": DRAFT_MD, "evidence_spans": SPANS})
