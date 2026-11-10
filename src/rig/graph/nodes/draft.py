@@ -2,7 +2,7 @@
 
 Toda frase factual carrega ``[C<n>]`` apontando para ``chunks[n-1]``, e cada
 ``evidence_span`` é validado como substring literal do texto do chunk. A
-validação é feita pelo portão local (``rig.graph.citations``) antes de devolver
+validação é feita pelo portão local (``rig.core.citations``) antes de devolver
 o resultado; violação é erro, nunca silêncio.
 """
 
@@ -15,7 +15,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from rig.graph.citations import (
+from rig.core.citations import (
     CitationSpan,
     chunk_id,
     chunk_text,

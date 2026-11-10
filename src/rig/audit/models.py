@@ -48,3 +48,25 @@ class Finding(BaseModel):
     detail: str
     chunk_id: str | None
     severity: Severity
+
+
+class Usage(BaseModel):
+    """Tokens consumidos em uma chamada do juiz NLI (contabilidade local da auditoria).
+
+    Tipo local para a fronteira de pacote (docs/10 §1: ``rig.audit`` só importa
+    ``rig.core``): o juiz acumula uso e custo sem depender do tipo do provedor —
+    o gerador concreto é injetado pelo runner.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    reasoning_tokens: int = 0
+
+    def __add__(self, other: Usage) -> Usage:
+        return Usage(
+            prompt_tokens=self.prompt_tokens + other.prompt_tokens,
+            completion_tokens=self.completion_tokens + other.completion_tokens,
+            reasoning_tokens=self.reasoning_tokens + other.reasoning_tokens,
+        )

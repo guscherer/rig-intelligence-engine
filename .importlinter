@@ -84,10 +84,3 @@ layers =
     rig.graph
     rig.adapters | rig.retrieval | rig.audit
     rig.core
-# rig.graph.citations é folha pura (sem dep de rig): audit a reusa na regra 4
-# (frase factual sem citação), sem criar ciclo — a exceção é pontual e documentada.
-# rig.audit.nli depende do protocolo StructuredGenerator (DIP, docs/10 §4), que
-# vive em rig.adapters — dependência de interface, não do SDK concreto.
-ignore_imports =
-    rig.audit.* -> rig.graph.citations
-    rig.audit.* -> rig.adapters

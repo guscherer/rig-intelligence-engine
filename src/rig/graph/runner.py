@@ -31,8 +31,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from rig.adapters import Generation, StructuredGenerator
 from rig.audit import AuditReport, Decision, DeepSeekNliJudge, NliJudge, SectionTemplate
+from rig.core.citations import CitationError, CitationSpan
 from rig.core.config import Settings, get_settings
-from rig.graph.citations import CitationError, CitationSpan
 from rig.graph.nodes.audit import DEFAULT_TEMPLATE, audit
 from rig.graph.nodes.draft import DraftResult, draft
 from rig.graph.nodes.positioning import positioning
@@ -92,7 +92,7 @@ class RunReport(BaseModel):
     budget: BudgetInfo
     duration_s: float
     modelos: dict[str, str]
-    status: Literal["ok", "partial"]
+    status: Literal["ok", "partial", "blocked"]
     partial_reason: str | None = None
     pricing: dict[str, float]
     evidence_spans: list[CitationSpan] = Field(default_factory=list)
@@ -386,6 +386,22 @@ async def _run_relevant_path(
     return chunks, draft_result
 
 
+def _resolve_status(
+    audit_report: AuditReport | None, partial: bool
+) -> Literal["ok", "partial", "blocked"]:
+    """Deriva o ``status`` de topo do ``run.json`` (precedência documentada).
+
+    Bloqueio de auditoria vence sobre qualquer ``partial``: é o veredito do
+    produto (§6.4) — uma minuta reprovada não pode sair como "ok" nem ser
+    mascarada como "partial" no relatório.
+    """
+    if audit_report is not None and audit_report.decision is Decision.BLOCKED:
+        return "blocked"
+    if partial:
+        return "partial"
+    return "ok"
+
+
 async def run_pipeline(
     *,
     doc_id: str,
@@ -487,6 +503,7 @@ async def run_pipeline(
 
     duration = time.monotonic() - started
     partial = partial_reason is not None
+    status = _resolve_status(audit_report, partial)
     report = RunReport(
         run_id=run_id,
         doc_id=doc_id,
@@ -499,7 +516,7 @@ async def run_pipeline(
         budget=BudgetInfo(max_cost_usd=budget.max_cost_usd, deadline_s=budget.deadline_s),
         duration_s=round(duration, 3),
         modelos=modelos,
-        status="partial" if partial else "ok",
+        status=status,
         partial_reason=partial_reason,
         pricing={
             "input_cost_per_token": settings.input_cost_per_token,

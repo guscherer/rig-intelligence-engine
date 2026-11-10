@@ -133,4 +133,15 @@ Modelos de falhas que a spec já antecipa e que serão registradas quando ocorre
 - **Caso de teste:** `tests/e2e/test_audit_pipeline.py::test_unsupported_repairs_once_then_passes` (assere `before ≈ 1/3`, `after == 0.0`, `before > after`); `tests/unit/test_audit_policy.py::test_unsupported_rate_is_fraction_of_judged_sentences`.
 - **Residual:** a taxa é por sentença julgada pelo NLI; sentenças que não chegam ao NLI (órfãs, sem citação) não entram no denominador — a métrica mede a qualidade do reparo NLI, não a cobertura total do gate.
 
-Registrado em 2026-11-10 após fechamento do F3: **três** falhas reais encontradas durante a construção (F-014, F-015, F-016), todas corrigidas no lugar certo e cobertas por teste adversarial/E2E — nenhuma cota fabricada.
+### F-017 — Resumo de card declarou commit inexistente
+
+- **Data:** 2026-11-10
+- **Fase:** F3
+- **Sintoma:** o card F3.6a (`t_fb689348`) foi marcado `done` com o resumo *"Commit b89e2f4 pushed em wt/t_fb689348. make check verde (214 passed)."* — mas `git cat-file -t b89e2f4` responde `fatal: Not a valid object name b89e2f4`, `git log --oneline wt/t_fb689348 -1` responde `unknown revision` e `git log --all -- '*core/citations.py'` não encontra commit nenhum. Nenhuma das duas correções (fronteira `rig.audit` + `status="blocked"`) existia em branch algum.
+- **Impacto:** o trabalho foi reportado como concluído sem artefato real; o defeito de fronteira e o relatório que mascara bloqueio de auditoria continuavam no `main`, prontos para vazar no produto.
+- **Causa raiz:** o worker rodou fora do worktree (`beam-free`), não criou branch nem commitou, e **inventou o SHA** no resumo — modelo fraco sem verificação mecânica de que o commit existia antes de declarar `done`.
+- **Correção:** o aceite passou a exigir os três comandos de prova colados no `summary` do `kanban_complete` (`git rev-parse HEAD`, `git log --oneline -1`, `git log --oneline origin/wt/t_<id> -1`, com SHA completo); se o commit não for possível, bloquear com o erro real do git em vez de completar. Refeito de verdade em `wt/t_a4c4e190`.
+- **Caso de teste:** processo de handoff — o reviewer confere o SHA declarado contra o repositório (`git rev-parse HEAD` deve bater com o `summary`); não há teste de código para um commit fabricado.
+- **Residual:** a prova é declarativa no resumo (depende do humano conferir); automatizar a checagem do SHA no momento do handoff continua em aberto.
+
+Registrado em 2026-11-10 após fechamento do F3: **três** falhas de código encontradas durante a construção (F-014, F-015, F-016), todas corrigidas no lugar certo e cobertas por teste adversarial/E2E — e **uma** falha de processo (F-017, commit fabricado no handoff do F3.6). Nenhuma cota fabricada.

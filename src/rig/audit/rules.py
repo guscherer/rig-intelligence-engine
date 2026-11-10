@@ -16,10 +16,10 @@ from collections.abc import Sequence
 from typing import Any
 
 from rig.audit.models import Finding, RuleCode, Severity
-from rig.graph.citations import chunk_id, chunk_text, find_uncited_sentences
+from rig.core.citations import chunk_id, chunk_text, find_uncited_sentences
 
 # ── Regra 1: citação órfã ────────────────────────────────────────────────────
-# [C<n>] é 1-based (mesma convenção de FONTES no prompt e de rig.graph.citations).
+# [C<n>] é 1-based (mesma convenção de FONTES no prompt e de rig.core.citations).
 _CITATION_RE = re.compile(r"\[C(\d+)\]")
 
 # ── Regra 2: artigo inexistente ──────────────────────────────────────────────
@@ -60,7 +60,7 @@ _FORBIDDEN_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Fim de frase — mesma convenção de rig.graph.citations (ponto entre dígitos não
+# Fim de frase — mesma convenção de rig.core.citations (ponto entre dígitos não
 # separa; serve para devolver a "frase ofensora" das regras 5 e 6).
 _SENTENCE_BOUNDARY_RE = re.compile(r"[.!?;]+(?![0-9])")
 
@@ -154,7 +154,7 @@ def number_mismatches(draft: str, chunks: Sequence[Any]) -> list[Finding]:
 
 
 def uncited_facts(draft: str, _chunks: Sequence[Any]) -> list[Finding]:
-    """Frase factual sem citação — reusa o portão local de ``rig.graph.citations``.
+    """Frase factual sem citação — reusa o portão local de ``rig.core.citations``.
 
     A assinatura é uniforme (``chunks`` vem da interface comum), mas a heurística
     só precisa do texto do draft; a fonte real é :func:`find_uncited_sentences`.
@@ -274,7 +274,7 @@ def _chunk_kind(chunk: Any) -> str:
 
 
 def _sentence_spans(text: str) -> list[tuple[int, int, str]]:
-    """Divide em frases ``(start, end, body)``, como ``rig.graph.citations``."""
+    """Divide em frases ``(start, end, body)``, como ``rig.core.citations``."""
     spans: list[tuple[int, int, str]] = []
     start = 0
     for match in _SENTENCE_BOUNDARY_RE.finditer(text):

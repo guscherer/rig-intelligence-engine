@@ -3,8 +3,8 @@
 Para cada sentença com citação, decide — com um LLM barato e determinístico
 (``temperature=0``) — se o trecho recuperado sustenta a afirmação. É a camada
 que custa dinheiro: por isso o modelo é injetado via :class:`NliJudge`
-(protocolo) e o juiz concreto reusa o ``StructuredGenerator`` que já existe no
-repo (DIP, docs/10 §4), sem cliente HTTP próprio.
+(protocolo) e o juiz concreto recebe um gerador injetado pelo runner
+(DIP, docs/10 §4), sem cliente HTTP próprio aqui.
 
 Veredito fora do enum e JSON malformado **levantam** (nunca viram ``SUPPORTED``):
 falhar aberto num portão de auditoria é o mesmo que não ter portão (§6.2).
@@ -19,7 +19,7 @@ from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict
 
-from rig.adapters import StructuredGenerator, Usage
+from rig.audit.models import Usage
 
 # deepseek-flash: modelo barato de classificação (docs/03 §7 — "audit | Flash").
 MODEL = "deepseek-flash"
@@ -58,6 +58,26 @@ class NliJudge(Protocol):
     """Protocolo estreito do juiz NLI: quem chama recebe isto, não o SDK."""
 
     async def judge(self, sentence: str, span: str, citation: int) -> SentenceVerdict: ...
+
+
+class _Generator(Protocol):
+    """Interface estreita que o juiz exige do gerador injetado (DIP, docs/10 §4).
+
+    O gerador concreto (``StructuredGenerator``) é injetado pelo runner; aqui só
+    se declara o que o juiz consome — ``generate`` devolvendo o conteúdo e o uso
+    da chamada — para manter a fronteira de pacote (docs/10 §1): ``rig.audit``
+    não importa a camada de adapters.
+    """
+
+    async def generate(
+        self,
+        prompt: str,
+        *,
+        json_mode: bool = False,
+        temperature: float = 0.0,
+        max_tokens: int = 4096,
+        model: str | None = None,
+    ) -> Any: ...
 
 
 def _build_nli_prompt(span: str, sentence: str) -> str:
@@ -128,7 +148,7 @@ class DeepSeekNliJudge:
 
     def __init__(
         self,
-        generator: StructuredGenerator,
+        generator: _Generator,
         *,
         model: str = MODEL,
         max_tokens: int = MAX_TOKENS,

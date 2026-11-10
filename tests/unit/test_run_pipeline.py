@@ -20,8 +20,12 @@ CHUNKS = [
 ]
 
 DRAFT_MD = (
-    "O projeto altera a alíquota do ICMS de 18% para 15% [C1]. "
-    "A proposta estabelece prazo de 90 dias para adequação [C2]."
+    "## Escopo\n"
+    "O projeto altera a alíquota do ICMS de 18% para 15% [C1].\n"
+    "## Análise\n"
+    "A proposta estabelece prazo de 90 dias para adequação [C2].\n"
+    "## Recomendação\n"
+    "Observar o prazo de 90 dias para adequação [C2]."
 )
 SPANS = [
     {"citation": 1, "span": "altera a alíquota do ICMS de 18% para 15%"},
