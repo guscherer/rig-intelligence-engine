@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class RuleCode(StrEnum):
-    """Código estável de cada regra dura da camada 1."""
+    """Código estável de cada regra determinística (camada 1 e checagem global §6.3)."""
 
     ORPHAN_CITATION = "orphan_citation"  # [C9] com índice inexistente
     MISSING_ARTICLE = "missing_article"  # "Art. 42" quando a fonte só vai até Art. 30
@@ -25,6 +25,10 @@ class RuleCode(StrEnum):
     UNCITED_FACT = "uncited_fact"  # frase factual sem [C
     FORBIDDEN_LANGUAGE = "forbidden_language"  # "inconstitucional", "certamente", "garantimos"
     PREAMBLE_AS_DEVICE = "preamble_as_device"  # cita preâmbulo como se fosse dispositivo
+    UNCITED_QUANTITY = "uncited_quantity"  # %/R$/mil/milhão/bilhão em frase sem [C
+    UNSUPPORTED_PROMISE = "unsupported_promise"  # prazo/resultado prometido ausente da fonte
+    MISSING_SECTION = "missing_section"  # seção obrigatória do template ausente
+    EMPTY_SECTION = "empty_section"  # seção presente mas vazia/placeholder
 
 
 class Severity(StrEnum):
