@@ -9,6 +9,8 @@ import pytest
 
 from rig.adapters import Generation, Usage
 from rig.core.config import Settings
+from rig.graph import runner
+from rig.graph.nodes.positioning import PositioningBrief
 from rig.graph.runner import run_pipeline
 
 CHUNKS = [
@@ -203,3 +205,67 @@ async def test_run_pipeline_repairs_uncited_draft(tmp_path: Path) -> None:
     assert outcome.partial is False
     assert outcome.report.status == "ok"
     assert "[C1]" in outcome.markdown
+
+
+@pytest.mark.asyncio
+async def test_run_pipeline_wires_positioning_into_draft_prompt_and_retrieve_doc_id(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Aceite F2.6: saída de positioning chega ao prompt do draft e retrieve
+    é chamado com doc_id."""
+    captured: dict[str, object] = {"retrieve_kwargs": None, "prompts": []}
+
+    async def fake_retrieve(*args: object, **kwargs: object) -> list[object]:
+        captured["retrieve_kwargs"] = dict(kwargs)
+        return []
+
+    async def fake_positioning(*args: object, **kwargs: object) -> PositioningBrief:
+        return PositioningBrief(restricoes=["RESTRICAO_SECRETA_X"])
+
+    class CapturingGenerator(FakeGenerator):
+        async def generate(
+            self,
+            prompt: str,
+            *,
+            json_mode: bool = False,
+            temperature: float = 0.0,
+            max_tokens: int = 4096,
+            system: str | None = None,
+            model: str | None = None,
+            effort: str | None = None,
+        ) -> Generation:
+            prompts = captured["prompts"]
+            assert isinstance(prompts, list)
+            prompts.append(prompt)
+            return await super().generate(
+                prompt,
+                json_mode=json_mode,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                system=system,
+                model=model,
+                effort=effort,
+            )
+
+    monkeypatch.setattr(runner, "retrieve", fake_retrieve)
+    monkeypatch.setattr(runner, "positioning", fake_positioning)
+
+    outcome = await run_pipeline(
+        doc_id="d1",
+        generator=CapturingGenerator(),
+        load_document=_load_document,
+        load_chunks=_load_chunks,
+        settings=_settings(),
+        reports_dir=tmp_path,
+    )
+
+    assert outcome.partial is False
+    retrieve_kwargs = captured["retrieve_kwargs"]
+    assert isinstance(retrieve_kwargs, dict)
+    assert retrieve_kwargs.get("doc_id") == "d1" or (
+        isinstance(retrieve_kwargs.get("filters"), dict)
+        and retrieve_kwargs["filters"].get("doc_id") == "d1"
+    )
+    prompts = captured["prompts"]
+    assert isinstance(prompts, list)
+    assert any("RESTRICAO_SECRETA_X" in str(p) for p in prompts)

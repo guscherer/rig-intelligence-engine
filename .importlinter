@@ -46,3 +46,41 @@ source_modules =
     rig.retrieval
 forbidden_modules =
     rig.integrations
+
+# ── 5. rig.graph é camada de orquestração: importa adapters/retrieval/audit/core ──
+[importlinter:contract:graph-boundaries]
+name = rig.graph nao importa api, eval, ingestion, agents nem integrations
+type = forbidden
+source_modules =
+    rig.graph
+forbidden_modules =
+    rig.api
+    rig.eval
+    rig.ingestion
+    rig.agents
+    rig.integrations
+
+# ── 6. rig.adapters é folha: só rig.core (e libs externas) ──
+[importlinter:contract:adapters-leaf]
+name = rig.adapters so importa rig.core
+type = forbidden
+source_modules =
+    rig.adapters
+forbidden_modules =
+    rig.api
+    rig.eval
+    rig.agents
+    rig.graph
+    rig.ingestion
+    rig.retrieval
+    rig.audit
+    rig.integrations
+
+# ── 7. Camadas do grafo: graph -> (adapters | retrieval | audit) -> core ──
+[importlinter:contract:graph-layers]
+name = Camadas do grafo: graph -> adapters/retrieval/audit -> core
+type = layers
+layers =
+    rig.graph
+    rig.adapters | rig.retrieval | rig.audit
+    rig.core

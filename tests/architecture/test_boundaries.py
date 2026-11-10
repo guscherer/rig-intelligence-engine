@@ -10,6 +10,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from importlinter.application.use_cases import lint_imports
+
 SRC = Path(__file__).resolve().parents[2] / "src" / "rig"
 
 PROVIDER_SDKS = {"google", "openai", "anthropic", "cohere", "mistralai"}
@@ -62,3 +64,16 @@ def test_core_has_no_internal_dependencies() -> None:
         )
     ]
     assert not offenders, f"rig.core depende de camada superior: {offenders}"
+
+
+def test_graph_importing_api_fails_importlinter() -> None:
+    """Prova negativa: um import ``rig.graph -> rig.api`` reprovaria o gate."""
+    project_root = Path(__file__).resolve().parents[2]
+    importlinter = project_root / ".importlinter"
+    offender = project_root / "src" / "rig" / "graph" / "_negtest_offender.py"
+    offender.write_text("from rig.api import routers  # noqa: F401\n", encoding="utf-8")
+    try:
+        ok = lint_imports(config_filename=str(importlinter), no_logo=True, cache_dir=None)
+    finally:
+        offender.unlink(missing_ok=True)
+    assert ok is False, "import-linter deveria reprovar rig.graph importando rig.api"

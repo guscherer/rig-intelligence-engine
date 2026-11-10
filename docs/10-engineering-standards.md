@@ -17,19 +17,22 @@ Fronteiras de pacote que **seriam** as dos serviços, se um dia fossem extraído
 | Pacote | Interface pública | Pode importar |
 |---|---|---|
 | `rig.core` | modelos, config, db, telemetria | nada interno |
+| `rig.adapters` | providers (`StructuredGenerator` + SDK) | core |
 | `rig.ingestion` | `CamaraClient`, `chunk_document` | core |
 | `rig.retrieval` | `HybridSearch.search(query) -> list[RetrievedChunk]` | core |
 | `rig.audit` | `audit_draft(draft, chunks) -> AuditReport` | core |
 | `rig.integrations` | `ReviewChannel` (protocolo) + adapters | core |
-| `rig.agents` | `build_graph(deps) -> CompiledGraph` | core, retrieval, audit, integrations |
+| `rig.graph` | estado tipado, nós, runner (`run_pipeline`) | adapters, retrieval, audit, core |
+| `rig.agents` | shim de compatibilidade (re-exporta `rig.graph.state`) | graph (deprecated; canônico é `rig.graph`) |
 | `rig.api` | routers | tudo abaixo |
 | `rig.eval` | harness | tudo (ninguém importa `eval`) |
 
 Regras que o CI verifica (`.importlinter`):
 
-1. Camadas só descem: `eval → api → agents → (ingestion | retrieval | audit | integrations) → core`.
+1. Camadas só descem: `eval → api → agents → (ingestion | retrieval | audit | integrations) → core` (mais as camadas do grafo: `graph → (adapters | retrieval | audit) → core`).
 2. Nenhum módulo de produção importa `rig.eval`.
-3. `rig.agents` não importa `rig.ingestion` — agente recebe proposição pronta; buscar dado é do plano offline.
+3. `rig.agents` não importa `rig.ingestion` — agente recebe proposição pronta; buscar dado é do plano offline. `rig.graph` segue a mesma regra (não importa `rig.ingestion`) e também não importa `rig.api`/`rig.eval`/`rig.integrations`.
+4. `rig.adapters` é folha: só `rig.core` (e libs externas). SDK de provedor não sai de `adapters/`.
 
 **Quando extrair de verdade** (critério declarado, não estético): ingestão acima de 30 min competindo por CPU com a geração; corpus acima de 50 M chunks; segundo consumidor do retrieval. Antes disso, extração é custo sem retorno.
 
