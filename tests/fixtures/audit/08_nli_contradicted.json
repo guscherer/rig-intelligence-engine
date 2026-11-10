@@ -1,0 +1,19 @@
+{
+  "description": "NLI CONTRADICTED: trecho diz o oposto",
+  "synthetic": true,
+  "draft": "## Escopo\nA norma define diretrizes gerais para o setor [C1].\n## Análise\nA medida altera os procedimentos administrativos [C1].\n## Recomendação\nObservar as diretrizes estabelecidas [C1].",
+  "chunks": [
+    {
+      "chunk_id": "c1",
+      "text": "A norma define diretrizes gerais para o setor e altera os procedimentos administrativos.",
+      "kind": "dispositivo"
+    }
+  ],
+  "nli_verdicts": [
+    "CONTRADICTED",
+    "SUPPORTED",
+    "SUPPORTED"
+  ],
+  "expected_decision": "BLOCKED",
+  "expected_codes": []
+}

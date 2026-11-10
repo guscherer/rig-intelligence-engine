@@ -332,6 +332,27 @@ def find_uncited_sentences(text: str) -> list[UncitedSentence]:
     return out
 
 
+def iter_cited_sentences(text: str, chunks: Sequence[Any]) -> list[tuple[str, int]]:
+    """Devolve ``(sentença, índice da primeira citação)`` para cada frase citada.
+
+    Reusa a mesma segmentação de :func:`_iter_sentences` (títulos e marcadores de
+    lista ficam de fora; ponto entre dígitos não separa). Uma frase com mais de
+    uma citação é devolvida uma vez, pela primeira (docs/03 §6.2: o juiz NLI é
+    chamado por frase, não por marcador). Índices fora do intervalo são
+    ignorados aqui — a regra 1 da camada determinística (§6.1) já os sinaliza
+    como finding.
+    """
+    out: list[tuple[str, int]] = []
+    for sentence in _iter_sentences(text):
+        match = _CITATION_RE.search(sentence.text)
+        if match is None:
+            continue
+        index = int(match.group(1))
+        if 1 <= index <= len(chunks):
+            out.append((sentence.text, index))
+    return out
+
+
 def _unpack_span(entry: Any) -> tuple[int, str]:
     if isinstance(entry, CitationSpan):
         return entry.citation, entry.span
@@ -412,6 +433,7 @@ __all__ = [
     "chunk_id",
     "chunk_text",
     "find_uncited_sentences",
+    "iter_cited_sentences",
     "normalize_evidence_spans",
     "parse_citations",
     "validate_draft",

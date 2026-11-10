@@ -15,7 +15,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from rig.graph.citations import chunk_id, chunk_text
+from rig.core.citations import chunk_id, chunk_text
 
 
 class PositioningBrief(BaseModel):

@@ -1,0 +1,16 @@
+{
+  "description": "artigo inexistente: Art. 42 citado, fonte só alcança Art. 30",
+  "synthetic": true,
+  "draft": "## Escopo\nArt. 42 veda a prática de atos administrativos [C1].\n## Análise\nA medida altera os procedimentos administrativos [C1].\n## Recomendação\nObservar as diretrizes estabelecidas [C1].",
+  "chunks": [
+    {
+      "chunk_id": "c1",
+      "text": "Art. 30 veda a prática.",
+      "kind": "dispositivo"
+    }
+  ],
+  "expected_decision": "BLOCKED",
+  "expected_codes": [
+    "missing_article"
+  ]
+}

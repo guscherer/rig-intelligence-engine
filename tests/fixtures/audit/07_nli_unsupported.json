@@ -1,0 +1,19 @@
+{
+  "description": "NLI UNSUPPORTED: trecho trata do tema, não sustenta o específico",
+  "synthetic": true,
+  "draft": "## Escopo\nA norma define diretrizes gerais para o setor [C1].\n## Análise\nA medida altera os procedimentos administrativos [C1].\n## Recomendação\nObservar as diretrizes estabelecidas [C1].",
+  "chunks": [
+    {
+      "chunk_id": "c1",
+      "text": "A norma define diretrizes gerais para o setor e altera os procedimentos administrativos.",
+      "kind": "dispositivo"
+    }
+  ],
+  "nli_verdicts": [
+    "UNSUPPORTED",
+    "SUPPORTED",
+    "SUPPORTED"
+  ],
+  "expected_decision": "REPAIR",
+  "expected_codes": []
+}

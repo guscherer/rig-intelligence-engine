@@ -169,7 +169,7 @@ class RIGState(BaseModel):
     triage: Any | None = None
     position: Any | None = None
     draft: str | None = None
-    audit: str | None = None
+    audit: Any | None = None
     repair_cycle: int = 0
     revision_notes: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)

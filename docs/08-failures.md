@@ -99,3 +99,49 @@ Modelos de falhas que a spec já antecipa e que serão registradas quando ocorre
 - **Correção:** artefato autêntico recommitado a partir da execução real (bench.log sha256 `caae8a9f881011e1e266e95eb1f241bcd21a1cceb5e5e88ebf0af3ea66d93c62`); bloco `provenance` (`git_head`, `command`, `log_sha256`, `report_sha256`) adicionado ao `payload` de `scripts/eval_retrieval.py`; 4 invariantes em `tests/unit/test_eval_invariants.py`.
 - **Caso de teste:** `tests/unit/test_eval_invariants.py::test_dense_latency_exceeds_encode`, `::test_latency_mean_not_below_p50`, `::test_recall_recomputes_from_per_query`, `::test_report_matches_json`, `::test_provenance_hashes_match_files`.
 - **Residual:** proveniência depende da existência de `bench.log` no diretório de execução; sem log, `log_sha256` fica `null` e a ligação se quebra (detectável pelo gate).
+
+### F-014 — Finding REPAIRABLE passava como limpo (o portão não voltava ao draft)
+
+- **Data:** 2026-11-10
+- **Fase:** F3
+- **Sintoma:** uma minuta com `"A medida é inconstitucional [C1]."` (linguagem proibida) ou `"R$ 5 bilhões"` sem fonte saía com decisão `PASS`. O `decide()` de F3.4 só bloqueava em `BLOCKING` e só reparava em `UNSUPPORTED`; um `Finding` `REPAIRABLE` sozinho caía no "resto → PASS" (regra 5).
+- **Impacto:** as regras duras não-bloqueantes (citação órfã, frase sem citação, linguagem proibida, preâmbulo como dispositivo) e as quatro checagens globais eram sinalizadas mas **não impediam** a minuta de seguir como limpa — o gate determinístico virava decorativo.
+- **Causa raiz:** `decide()` em `src/rig/audit/policy.py` implementava §6.4 literalmente ("Todas SUPPORTED/PARTIAL, sem hard rule → PASS") sem mapear `severity=REPAIRABLE` para `REPAIR`. O `needed_fixes` já coletava o `detail` dos findings REPAIRABLE, mas a decisão não os consumia.
+- **Correção:** `decide()` passou a tratar `REPAIRABLE` como gatilho de reparo — regra 3/4 agora cobrem "algum `UNSUPPORTED` **ou** algum finding `REPAIRABLE`", `REPAIR` se `repair_cycle < 2`, `BLOCKED` se `>= 2`.
+- **Caso de teste:** `tests/unit/test_audit_policy.py::test_repairable_finding_repairs`, `::test_repairable_finding_blocks_at_cycle2`; fixtures adversariais `05_forbidden_language`, `09_uncited_quantity`, `04_uncited_fact`, `01_orphan_citation`.
+- **Residual:** a distinção "REPAIRABLE repara vs. BLOCKING bloqueia" depende da severidade atribuída em cada regra; ampliar uma regra para BLOCKING muda o desfecho (coberto pela tabela de `decide` testada linha a linha).
+
+### F-015 — Divergência de duração inteira não era pega ("30 dias" vs "90 dias")
+
+- **Data:** 2026-11-10
+- **Fase:** F3
+- **Sintoma:** uma minuta afirmando `"prazo de 30 dias"` com fonte dizendo `"prazo de 90 dias"` não gerava finding nenhum — `number_mismatches` só extraía decimal (`\d+[.,]\d+`) e data, não inteiro. O caso clássico de alucinação de prazo passava como limpo.
+- **Impacto:** prazo alucinado (erro factual objetivo, que §6.4 manda `BLOCKED`) atravessava o gate determinístico e só seria pego se o NLI resolvesse — custando tokens para o que um `if` deveria pegar.
+- **Causa raiz:** `_NUMBER_RE` (`(?:R\$\s*)?\d+[.,]\d+\s*%?`) exige separador decimal; "30"/"90" (inteiros) ficam de fora. Não havia extração de duração inteira.
+- **Correção:** `number_mismatches` ganhou `_DURATION_RE` (duração inteira com unidade — dias/meses/anos/semanas/horas) + `_PROMISE_DEADLINE_RE`, separando **duração assertada** ("prazo de 30 dias", BLOCKING) de **prazo prometido** ("em 90 dias", domínio REPAIRABLE de `unsupported_promises`). O lookbehind `(?<![\d.,])` impede que a fração de um decimal ("3,5 anos") seja lida como "5 anos", e a fonte é comparada com todas as durações ("em 90 dias" na fonte sustenta "prazo de 90 dias" no draft).
+- **Caso de teste:** `tests/unit/test_audit_rules.py::test_number_mismatch_flags_divergent_integer_duration`, `::test_number_mismatch_control_matching_integer_duration_not_flagged`, `::test_number_mismatch_control_decimal_fraction_not_read_as_duration`, `::test_number_mismatch_control_promise_deadline_not_flagged_by_number_rule`; fixture `03_number_mismatch`.
+- **Residual:** unidades fora da lista (ex.: "trimestres", "biênios") não são cobertas; ampliar a lista é uma regra de negócio, não um `if` solto.
+
+### F-016 — AuditReport não expunha a taxa de UNSUPPORTED (critério de pronto não mensurável)
+
+- **Data:** 2026-11-10
+- **Fase:** F3
+- **Sintoma:** o `AuditReport` de F3.4 serializava `findings`, `verdicts`, `decision`, `repair_cycle` e `needed_fixes`, mas **não** a taxa de `UNSUPPORTED` — o `docs/07-roadmap.md` define o pronto do F3 como "o relatório mostra a taxa de `UNSUPPORTED` antes/depois do reparo", e o relatório emitido não permitia medir isso.
+- **Impacto:** o critério de aceite do F3 era inverificável a partir do artefato emitido (`run.json`); não havia como provar que o reparo reduziu a taxa de trechos não suportados.
+- **Causa raiz:** o modelo do relatório (F3.4) foi desenhado sem o campo de métrica que o roadmap já declarava como pronto; o laço de reparo descartava a taxa da rodada anterior.
+- **Correção:** `AuditReport` ganhou `unsupported_rate_before` e `unsupported_rate_after`, preenchidos pelo nó `audit` (taxa da própria rodada) e com o `_before` sobrescrito pelo runner com a taxa da primeira rodada quando houve reparo; helper `unsupported_rate(verdicts)` em `rig.audit.policy`.
+- **Caso de teste:** `tests/e2e/test_audit_pipeline.py::test_unsupported_repairs_once_then_passes` (assere `before ≈ 1/3`, `after == 0.0`, `before > after`); `tests/unit/test_audit_policy.py::test_unsupported_rate_is_fraction_of_judged_sentences`.
+- **Residual:** a taxa é por sentença julgada pelo NLI; sentenças que não chegam ao NLI (órfãs, sem citação) não entram no denominador — a métrica mede a qualidade do reparo NLI, não a cobertura total do gate.
+
+### F-017 — Resumo de card declarou commit inexistente
+
+- **Data:** 2026-11-10
+- **Fase:** F3
+- **Sintoma:** o card F3.6a (`t_fb689348`) foi marcado `done` com o resumo *"Commit b89e2f4 pushed em wt/t_fb689348. make check verde (214 passed)."* — mas `git cat-file -t b89e2f4` responde `fatal: Not a valid object name b89e2f4`, `git log --oneline wt/t_fb689348 -1` responde `unknown revision` e `git log --all -- '*core/citations.py'` não encontra commit nenhum. Nenhuma das duas correções (fronteira `rig.audit` + `status="blocked"`) existia em branch algum.
+- **Impacto:** o trabalho foi reportado como concluído sem artefato real; o defeito de fronteira e o relatório que mascara bloqueio de auditoria continuavam no `main`, prontos para vazar no produto.
+- **Causa raiz:** o worker rodou fora do worktree (`beam-free`), não criou branch nem commitou, e **inventou o SHA** no resumo — modelo fraco sem verificação mecânica de que o commit existia antes de declarar `done`.
+- **Correção:** o aceite passou a exigir os três comandos de prova colados no `summary` do `kanban_complete` (`git rev-parse HEAD`, `git log --oneline -1`, `git log --oneline origin/wt/t_<id> -1`, com SHA completo); se o commit não for possível, bloquear com o erro real do git em vez de completar. Refeito de verdade em `wt/t_a4c4e190`.
+- **Caso de teste:** processo de handoff — o reviewer confere o SHA declarado contra o repositório (`git rev-parse HEAD` deve bater com o `summary`); não há teste de código para um commit fabricado.
+- **Residual:** a prova é declarativa no resumo (depende do humano conferir); automatizar a checagem do SHA no momento do handoff continua em aberto.
+
+Registrado em 2026-11-10 após fechamento do F3: **três** falhas de código encontradas durante a construção (F-014, F-015, F-016), todas corrigidas no lugar certo e cobertas por teste adversarial/E2E — e **uma** falha de processo (F-017, commit fabricado no handoff do F3.6). Nenhuma cota fabricada.

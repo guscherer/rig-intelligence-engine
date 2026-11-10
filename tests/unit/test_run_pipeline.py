@@ -20,8 +20,12 @@ CHUNKS = [
 ]
 
 DRAFT_MD = (
-    "O projeto altera a alíquota do ICMS de 18% para 15% [C1]. "
-    "A proposta estabelece prazo de 90 dias para adequação [C2]."
+    "## Escopo\n"
+    "O projeto altera a alíquota do ICMS de 18% para 15% [C1].\n"
+    "## Análise\n"
+    "A proposta estabelece prazo de 90 dias para adequação [C2].\n"
+    "## Recomendação\n"
+    "Observar o prazo de 90 dias para adequação [C2]."
 )
 SPANS = [
     {"citation": 1, "span": "altera a alíquota do ICMS de 18% para 15%"},
@@ -54,6 +58,14 @@ class FakeGenerator:
                 ),
                 model=used,
                 usage=Usage(prompt_tokens=100, completion_tokens=20, reasoning_tokens=5),
+            )
+        if "Avalie se o TRECHO sustenta" in prompt:
+            return Generation(
+                content=json.dumps(
+                    {"verdict": "SUPPORTED", "justification": "ok", "needed_fix": None}
+                ),
+                model=used,
+                usage=Usage(prompt_tokens=10, completion_tokens=5, reasoning_tokens=0),
             )
         return Generation(
             content=json.dumps({"markdown": DRAFT_MD, "evidence_spans": SPANS}),
@@ -181,6 +193,14 @@ async def test_run_pipeline_repairs_uncited_draft(tmp_path: Path) -> None:
                     ),
                     model=used,
                     usage=Usage(prompt_tokens=100, completion_tokens=20, reasoning_tokens=5),
+                )
+            if "Avalie se o TRECHO sustenta" in prompt:
+                return Generation(
+                    content=json.dumps(
+                        {"verdict": "SUPPORTED", "justification": "ok", "needed_fix": None}
+                    ),
+                    model=used,
+                    usage=Usage(prompt_tokens=10, completion_tokens=5, reasoning_tokens=0),
                 )
             if "Correções" in prompt:
                 content = json.dumps({"markdown": DRAFT_MD, "evidence_spans": SPANS})

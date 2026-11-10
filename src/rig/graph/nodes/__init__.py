@@ -1,3 +1,4 @@
+from rig.graph.nodes.audit import DEFAULT_TEMPLATE, audit
 from rig.graph.nodes.draft import DraftError, DraftResult, draft
 from rig.graph.nodes.positioning import PositioningBrief, positioning
 from rig.graph.nodes.retrieve import (
@@ -19,6 +20,7 @@ from rig.graph.nodes.triage import (
 )
 
 __all__ = [
+    "DEFAULT_TEMPLATE",
     "DraftError",
     "DraftResult",
     "EvidenceSpan",
@@ -28,6 +30,7 @@ __all__ = [
     "TriageResult",
     "async_retrieve",
     "async_triage",
+    "audit",
     "compute_triage_score",
     "draft",
     "positioning",

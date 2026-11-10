@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from rig.graph.citations import (
+from rig.core.citations import (
     CitationSpan,
     InvalidEvidenceSpanError,
     UncitedFactualError,
