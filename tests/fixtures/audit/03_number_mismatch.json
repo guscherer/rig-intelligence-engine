@@ -1,0 +1,16 @@
+{
+  "description": "número divergente: draft diz 30 dias, fonte diz 90 dias",
+  "synthetic": true,
+  "draft": "## Escopo\nA norma estabelece prazo de 30 dias [C1].\n## Análise\nA medida altera os procedimentos administrativos [C1].\n## Recomendação\nObservar as diretrizes estabelecidas [C1].",
+  "chunks": [
+    {
+      "chunk_id": "c1",
+      "text": "A norma estabelece prazo de 90 dias.",
+      "kind": "dispositivo"
+    }
+  ],
+  "expected_decision": "BLOCKED",
+  "expected_codes": [
+    "number_mismatch"
+  ]
+}

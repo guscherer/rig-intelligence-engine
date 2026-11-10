@@ -82,6 +82,47 @@ def test_number_mismatch_flags_divergent_date() -> None:
     assert [f.code for f in findings] == [RuleCode.NUMBER_MISMATCH]
 
 
+def test_number_mismatch_flags_divergent_integer_duration() -> None:
+    # "30 dias" (inteiro) vs "90 dias": _NUMBER_RE (decimal) não pega; a
+    # extração de duração cobre o caso clássico de prazo alucinado.
+    findings = number_mismatches(
+        "A norma estabelece prazo de 30 dias [C1].",
+        [_chunk("c1", "A norma estabelece prazo de 90 dias.")],
+    )
+    assert [f.code for f in findings] == [RuleCode.NUMBER_MISMATCH]
+    assert findings[0].severity == Severity.BLOCKING
+
+
+def test_number_mismatch_control_matching_integer_duration_not_flagged() -> None:
+    # "prazo de 90 dias" no draft e "em 90 dias" na fonte: mesmo prazo.
+    findings = number_mismatches(
+        "A norma estabelece prazo de 90 dias [C1].",
+        [_chunk("c1", "A norma prevê adaptação em 90 dias.")],
+    )
+    assert not any(f.code == RuleCode.NUMBER_MISMATCH for f in findings)
+
+
+def test_number_mismatch_control_promise_deadline_not_flagged_by_number_rule() -> None:
+    # "em 90 dias" é promessa (domínio REPAIRABLE de unsupported_promises), não
+    # number_mismatch — sem duração assertada, a regra 3 não dispara.
+    findings = number_mismatches(
+        "A norma garantirá adaptação em 90 dias [C1].",
+        [_chunk("c1", "A norma prevê regras gerais.")],
+    )
+    assert not any(f.code == RuleCode.NUMBER_MISMATCH for f in findings)
+
+
+def test_number_mismatch_control_decimal_fraction_not_read_as_duration() -> None:
+    # "3,5 anos" vs "3,7 anos": um único finding (o decimal), não um segundo
+    # finding lendo "5 anos"/"7 anos" como duração.
+    findings = number_mismatches(
+        "O prazo é de 3,5 anos.",
+        [_chunk("c1", "O prazo é de 3,7 anos.")],
+    )
+    assert len(findings) == 1
+    assert findings[0].code == RuleCode.NUMBER_MISMATCH
+
+
 # ── Regra 4: frase factual sem citação ───────────────────────────────────────
 
 

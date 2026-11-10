@@ -21,7 +21,7 @@ from rig.audit.nli import (
     SentenceVerdict,
     Verdict,
 )
-from rig.audit.policy import AuditReport, Decision, decide
+from rig.audit.policy import AuditReport, Decision, decide, unsupported_rate
 from rig.audit.rules import (
     FORBIDDEN_PHRASES,
     forbidden_language,
@@ -60,4 +60,5 @@ __all__ = [
     "uncited_facts",
     "uncited_quantities",
     "unsupported_promises",
+    "unsupported_rate",
 ]

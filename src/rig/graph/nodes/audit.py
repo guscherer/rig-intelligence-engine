@@ -28,6 +28,7 @@ from rig.audit import (
     decide,
     global_checks,
     hard_rules,
+    unsupported_rate,
 )
 from rig.graph.citations import chunk_text, iter_cited_sentences
 from rig.graph.state import BudgetExceededError, BudgetState
@@ -92,6 +93,8 @@ async def audit(
             decision=Decision.BLOCKED,
             repair_cycle=repair_cycle,
             needed_fixes=[f"{BUDGET_EXCEEDED_REASON}: {exc}"],
+            unsupported_rate_before=unsupported_rate(verdicts),
+            unsupported_rate_after=unsupported_rate(verdicts),
         )
     return AuditReport(
         findings=findings,
@@ -99,6 +102,8 @@ async def audit(
         decision=decide(findings, verdicts, repair_cycle),
         repair_cycle=repair_cycle,
         needed_fixes=_collect_needed_fixes(findings, verdicts),
+        unsupported_rate_before=unsupported_rate(verdicts),
+        unsupported_rate_after=unsupported_rate(verdicts),
     )
 
 

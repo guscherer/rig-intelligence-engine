@@ -50,7 +50,7 @@ CHUNK = {"chunk_id": "c1", "text": "A norma prevê adaptação em 90 dias.", "ki
 async def test_unsupported_repairs_at_cycle0_with_needed_fixes() -> None:
     judge = _FakeJudge("UNSUPPORTED", needed_fix="Citar o trecho que define o prazo.")
     report = await audit(
-        draft_text="A norma estabelece prazo de 30 dias [C1].",
+        draft_text="A norma estabelece normas gerais [C1].",
         chunks=[CHUNK],
         template=DEFAULT_TEMPLATE,
         judge=judge,
@@ -65,7 +65,7 @@ async def test_unsupported_repairs_at_cycle0_with_needed_fixes() -> None:
 async def test_contradicted_blocks_at_cycle0() -> None:
     judge = _FakeJudge("CONTRADICTED")
     report = await audit(
-        draft_text="A norma estabelece prazo de 30 dias [C1].",
+        draft_text="A norma estabelece normas gerais [C1].",
         chunks=[CHUNK],
         template=DEFAULT_TEMPLATE,
         judge=judge,

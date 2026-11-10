@@ -1,0 +1,16 @@
+{
+  "description": "seção vazia: cabeçalho com placeholder TODO",
+  "synthetic": true,
+  "draft": "## Escopo\nTODO\n## Análise\nA medida altera os procedimentos administrativos [C1].\n## Recomendação\nObservar as diretrizes estabelecidas [C1].",
+  "chunks": [
+    {
+      "chunk_id": "c1",
+      "text": "A medida altera os procedimentos administrativos.",
+      "kind": "dispositivo"
+    }
+  ],
+  "expected_decision": "REPAIR",
+  "expected_codes": [
+    "empty_section"
+  ]
+}

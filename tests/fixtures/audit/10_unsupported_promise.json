@@ -1,0 +1,16 @@
+{
+  "description": "prazo inventado: 'em 90 dias' ausente da fonte",
+  "synthetic": true,
+  "draft": "## Escopo\nA norma garantirá a adequação em 90 dias [C1].\n## Análise\nA medida altera os procedimentos administrativos [C1].\n## Recomendação\nObservar as diretrizes estabelecidas [C1].",
+  "chunks": [
+    {
+      "chunk_id": "c1",
+      "text": "A medida altera os procedimentos administrativos.",
+      "kind": "dispositivo"
+    }
+  ],
+  "expected_decision": "REPAIR",
+  "expected_codes": [
+    "unsupported_promise"
+  ]
+}

@@ -31,6 +31,21 @@ _CHUNK_ARTICLE_RE = re.compile(r"\bArt\.?\s*(\d+)", re.IGNORECASE)
 # ── Regra 3: número/data divergente ──────────────────────────────────────────
 _NUMBER_RE = re.compile(r"(?:R\$\s*)?\d+[.,]\d+\s*%?")
 _DATE_RE = re.compile(r"\d{2}/\d{2}/\d{4}")
+# Duração inteira: "30 dias", "12 meses", "2 anos" — o caso clássico de
+# alucinação de prazo que o _NUMBER_RE (só decimal) não pega. O lookbehind
+# `(?<![\d.,])` impede que a fração de um decimal ("3,5 anos" → "5 anos") seja
+# lida como duração.
+_DURATION_RE = re.compile(
+    r"(?<![\d.,])\b\d{1,3}\s+(?:dias?|meses?|anos?|semanas?|horas?)\b", re.IGNORECASE
+)
+# Prazo *prometido* ("em 90 dias", "até 2026"): domínio da checagem global
+# REPAIRABLE ``unsupported_promises`` (§6.3), NÃO do ``number_mismatches``
+# (BLOCKING). Mantém a divisão §6.1/§6.3: número assertado divergente bloqueia;
+# promessa de prazo ausente da fonte volta ao draft.
+_PROMISE_DEADLINE_RE = re.compile(
+    r"\b(?:em|dentro\s+de|no\s+prazo\s+de|até)\s+\d{1,3}\s+(?:dias?|meses?|anos?|semanas?|horas?)\b",
+    re.IGNORECASE,
+)
 
 # ── Regra 5: linguagem proibida ──────────────────────────────────────────────
 # Lista fechada e documentada (docs/03 §6.1); espaço para crescer é aqui, nunca
@@ -92,12 +107,17 @@ def missing_articles(draft: str, chunks: Sequence[Any]) -> list[Finding]:
 
 
 def number_mismatches(draft: str, chunks: Sequence[Any]) -> list[Finding]:
-    """Número/data afirmado no draft que não consta (normalizado) nas fontes."""
+    """Número/data/duração afirmados no draft que não constam (normalizados) nas fontes."""
     source = "\n".join(chunk_text(chunk) for chunk in chunks)
     draft_numbers = {_normalize_number(m.group(0)) for m in _NUMBER_RE.finditer(draft)}
     source_numbers = {_normalize_number(m.group(0)) for m in _NUMBER_RE.finditer(source)}
     draft_dates = {m.group(0) for m in _DATE_RE.finditer(draft)}
     source_dates = {m.group(0) for m in _DATE_RE.finditer(source)}
+    # Draft: só duração *assertada* (promessa "em 90 dias" é da checagem global).
+    # Fonte: todas as durações — "em 90 dias" na fonte também sustenta um draft
+    # que afirme "prazo de 90 dias".
+    draft_durations = _asserted_durations(draft)
+    source_durations = {_normalize_duration(m.group(0)) for m in _DURATION_RE.finditer(source)}
 
     findings: list[Finding] = []
     for token in sorted(draft_numbers - source_numbers):
@@ -116,6 +136,16 @@ def number_mismatches(draft: str, chunks: Sequence[Any]) -> list[Finding]:
                 code=RuleCode.NUMBER_MISMATCH,
                 sentence=token,
                 detail=f"data {token!r} não consta nas fontes",
+                chunk_id=None,
+                severity=Severity.BLOCKING,
+            )
+        )
+    for token in sorted(draft_durations - source_durations):
+        findings.append(
+            Finding(
+                code=RuleCode.NUMBER_MISMATCH,
+                sentence=token,
+                detail=f"duração {token!r} não consta nas fontes",
                 chunk_id=None,
                 severity=Severity.BLOCKING,
             )
@@ -200,6 +230,27 @@ def hard_rules(draft: str, chunks: Sequence[Any]) -> list[Finding]:
 def _max_article_in_chunks(chunks: Sequence[Any]) -> int | None:
     numbers = [int(m.group(1)) for c in chunks for m in _CHUNK_ARTICLE_RE.finditer(chunk_text(c))]
     return max(numbers) if numbers else None
+
+
+def _asserted_durations(text: str) -> set[str]:
+    """Durações inteiras *assertadas* no texto (fora de ``em/até N dias``).
+
+    Prazo prometido ("em 90 dias") é domínio da checagem global REPAIRABLE
+    (§6.3), não do ``number_mismatches`` — aqui só entra duração afirmada
+    ("prazo de 30 dias").
+    """
+    promise_spans = [m.span() for m in _PROMISE_DEADLINE_RE.finditer(text)]
+    out: set[str] = set()
+    for match in _DURATION_RE.finditer(text):
+        if any(start <= match.start() < end for start, end in promise_spans):
+            continue
+        out.add(_normalize_duration(match.group(0)))
+    return out
+
+
+def _normalize_duration(token: str) -> str:
+    """Normaliza duração para comparação de igualdade (case/whitespace)."""
+    return re.sub(r"\s+", " ", token).strip().lower()
 
 
 def _normalize_number(token: str) -> str:

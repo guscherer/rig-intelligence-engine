@@ -295,8 +295,10 @@ async def _audit_and_repair(
 
     Devolve o ``DraftResult`` final e o relatório da última auditoria. A política
     (:func:`rig.audit.policy.decide`) devolve ``BLOCKED`` no ciclo 2, então o
-    laço termina por construção.
+    laço termina por construção. A taxa de ``UNSUPPORTED`` **antes** do reparo
+    é a da primeira rodada; a de **depois**, a da rodada final (docs/07).
     """
+    first_report: AuditReport | None = None
     while True:
         report = await audit(
             draft_text=draft_result.markdown,
@@ -306,9 +308,11 @@ async def _audit_and_repair(
             repair_cycle=state.repair_cycle,
             budget=state.budget,
         )
+        if first_report is None:
+            first_report = report
         state.audit = report
         if report.decision is not Decision.REPAIR or state.repair_cycle >= 2:
-            return draft_result, report
+            break
         state.repair_cycle += 1
         state.revision_notes = list(report.needed_fixes)
         state.budget.check()
@@ -324,6 +328,9 @@ async def _audit_and_repair(
         )
         state.draft = draft_result.markdown
         state.budget.check()
+    if first_report is not None:
+        report.unsupported_rate_before = first_report.unsupported_rate_before
+    return draft_result, report
 
 
 async def _run_relevant_path(

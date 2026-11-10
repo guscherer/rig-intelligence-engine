@@ -19,6 +19,7 @@ from rig.audit import (
     Severity,
     Verdict,
     decide,
+    unsupported_rate,
 )
 
 
@@ -97,10 +98,28 @@ def test_no_findings_no_verdicts_passes() -> None:
     assert decide([], [], 0) == Decision.PASS
 
 
-def test_repairable_finding_alone_passes() -> None:
-    # Literal de §6.4: decide só bloqueia em BLOCKING; finding REPAIRABLE não
-    # dispara regra 1 e, sem UNSUPPORTED/CONTRADICTED, cai no "resto → PASS".
-    assert decide([_repairable()], [_verdict(Verdict.SUPPORTED)], 0) == Decision.PASS
+def test_repairable_finding_repairs() -> None:
+    # §6.4: finding REPAIRABLE (ex.: linguagem proibida) volta ao draft, não
+    # passa como limpo. Regra 3: REPAIRABLE e cycle < 2 → REPAIR.
+    assert decide([_repairable()], [_verdict(Verdict.SUPPORTED)], 0) == Decision.REPAIR
+
+
+def test_repairable_finding_blocks_at_cycle2() -> None:
+    # REPAIRABLE que persiste após 2 ciclos bloqueia (mesma regra do UNSUPPORTED).
+    assert decide([_repairable()], [_verdict(Verdict.SUPPORTED)], 2) == Decision.BLOCKED
+
+
+# ── Taxa de UNSUPPORTED (critério de pronto do F3, docs/07) ──────────────────
+
+
+def test_unsupported_rate_is_fraction_of_judged_sentences() -> None:
+    assert unsupported_rate([_verdict(Verdict.UNSUPPORTED)]) == 1.0
+    assert unsupported_rate([_verdict(Verdict.SUPPORTED)]) == 0.0
+    assert unsupported_rate([_verdict(Verdict.UNSUPPORTED), _verdict(Verdict.SUPPORTED)]) == 0.5
+
+
+def test_unsupported_rate_empty_verdicts_is_zero() -> None:
+    assert unsupported_rate([]) == 0.0
 
 
 # ── Contrato do relatório ─────────────────────────────────────────────────────
@@ -114,6 +133,8 @@ def test_audit_report_rejects_unknown_fields() -> None:
             decision=Decision.PASS,
             repair_cycle=0,
             needed_fixes=[],
+            unsupported_rate_before=0.0,
+            unsupported_rate_after=0.0,
             campo_inventado="não deveria existir",
         )
 
@@ -125,6 +146,8 @@ def test_audit_report_roundtrip() -> None:
         decision=Decision.PASS,
         repair_cycle=0,
         needed_fixes=[],
+        unsupported_rate_before=0.0,
+        unsupported_rate_after=0.0,
     )
     assert report.decision == Decision.PASS
     assert report.repair_cycle == 0
