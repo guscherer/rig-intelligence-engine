@@ -145,3 +145,16 @@ Modelos de falhas que a spec já antecipa e que serão registradas quando ocorre
 - **Residual:** a prova é declarativa no resumo (depende do humano conferir); automatizar a checagem do SHA no momento do handoff continua em aberto.
 
 Registrado em 2026-11-10 após fechamento do F3: **três** falhas de código encontradas durante a construção (F-014, F-015, F-016), todas corrigidas no lugar certo e cobertas por teste adversarial/E2E — e **uma** falha de processo (F-017, commit fabricado no handoff do F3.6). Nenhuma cota fabricada.
+
+### F-018 — relatório de eval mascarou gate degradado (skipped não contado, exit 0 com passo falhando)
+
+- **Data:** 2026-11-10
+- **Fase:** F0
+- **Sintoma:** com Postgres fora de alcance, `DATABASE_URL='postgresql://rig:***@localhost:5432/rig' uv run python scripts/eval_report.py` imprimia `gate: 115 passed, 0 failed (ruff=OK, format=OK, mypy=OK, arch=OK, pytest=OK)` e saía com `EXIT=0`, embora 16 testes de integração tivessem skipado. `gather_gate()` só extraía `(\d+) passed` e `(\d+) failed`; `skipped` nunca entrava na conta e nenhum passo influenciava o exit code.
+- **Impacto:** o relatório, que existe para ser prova de gate, afirmava "tudo OK" com 16 testes ausentes — pior do que não imprimir nada.
+- **Causa raiz:** `gather_gate()` não contava `skipped` e `main()` sempre retornava 0 após escrever o arquivo; passos com código != 0 não propagavam status.
+- **Correção:** `scripts/eval_report.py` agora inclui `skipped` na linha `gate:` (`<p> passed, <f> failed, <s> skipped (...)`), imprime `gate: FAILED — <passos>` e retorna exit != 0 quando qualquer passo falha (arquivo ainda é escrito); `tests/unit/test_eval_report_gate.py` cobre os três casos.
+- **Caso de teste:** `tests/unit/test_eval_report_gate.py::test_gate_green`, `::test_gate_degraded`, `::test_gate_failed_step`.
+- **Residual:** este card fecha a honestidade do gatilho de gate (contagem de skipped + exit code por passo falhando); o que resta é manter o Postgres de pé para o gate ser realmente verde (F-008).
+
+_Nota de numeração (2026-11-10): esta entrada nasceu como F-013 no F0.7; o ID já pertencia à falha do F1 (artefato editado à mão). Renumerada para F-018 para manter a sequência única F-001..F-018 (F-014..F-016 = F3.5, F-017 = processo do F3.6, mantido). Decisão registrada no card `t_1d4630a0`._

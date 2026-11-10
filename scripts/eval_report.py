@@ -7,8 +7,9 @@ Reusa (nao reimplementa):
 - Postgres rig-db (corpus: documents/chunks)
 - gate real (ruff, format, mypy, lint-imports, pytest)
 
-Exit 0 quando o arquivo foi escrito (mesmo com campos not_measured).
-Exit != 0 apenas se nao conseguiu escrever o arquivo.
+Exit 0 quando o arquivo foi escrito e o gate (ruff, format, mypy, arch, pytest)
+estiver verde. Exit != 0 se o arquivo nao pode ser escrito OU se qualquer passo
+do gate retornar codigo != 0 (relatorio ainda e escrito nesse caso).
 """
 
 from __future__ import annotations
@@ -171,22 +172,25 @@ def gather_gate() -> str:
 
     pytest_passed = 0
     pytest_failed = 0
+    pytest_skipped = 0
     pytest_out = next((o for n, _, o in results if n == "pytest"), "")
     m_passed = re.search(r"(\d+)\s+passed", pytest_out)
     m_failed = re.search(r"(\d+)\s+failed", pytest_out)
+    m_skipped = re.search(r"(\d+)\s+skipped", pytest_out)
     if m_passed:
         pytest_passed = int(m_passed.group(1))
     if m_failed:
         pytest_failed = int(m_failed.group(1))
+    if m_skipped:
+        pytest_skipped = int(m_skipped.group(1))
 
     failed_steps = [name for name, code, _ in results if code != 0]
     status_bits = ", ".join(f"{name}={'OK' if code == 0 else 'FAIL'}" for name, code, _ in results)
     if failed_steps:
-        return (
-            f"{pytest_passed} passed, {pytest_failed} failed "
-            f"({', '.join(failed_steps)} falhou; {status_bits})"
-        )
-    return f"{pytest_passed} passed, {pytest_failed} failed ({status_bits})"
+        return f"FAILED — {', '.join(failed_steps)} ({status_bits})"
+    return (
+        f"{pytest_passed} passed, {pytest_failed} failed, {pytest_skipped} skipped ({status_bits})"
+    )
 
 
 def gather_retrieval() -> str:
@@ -238,6 +242,7 @@ def main() -> int:
     corpus = gather_corpus()
     gate = gather_gate()
     retrieval = gather_retrieval()
+    gate_failed = gate.startswith("FAILED")
     report = render_report(
         commit=commit,
         corpus=corpus,
@@ -258,7 +263,7 @@ def main() -> int:
     print(f"corpus: {corpus}")
     print(f"gate: {gate}")
     print(f"retrieval: {retrieval}")
-    return 0
+    return 1 if gate_failed else 0
 
 
 if __name__ == "__main__":
